@@ -1,0 +1,3 @@
+
+EXCLUDES="README*.md LICENSE .git*"
+DOTFILES_DIRS="$HOME/dotfiles"
