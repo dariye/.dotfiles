@@ -61,5 +61,6 @@ cask "spectacle"
 cask "spotify"
 cask "visual-studio-code"
 cask "docker"
-
+cask "steam"
+cask "intellij-idea-ce"
 
