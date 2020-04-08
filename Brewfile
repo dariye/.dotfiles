@@ -63,4 +63,5 @@ cask "visual-studio-code"
 cask "docker"
 cask "steam"
 cask "intellij-idea-ce"
-
+cask "sonic-pi"
+cask "runjs"

@@ -1,9 +1,9 @@
 # .dotfiles
 
-
 ## Installation
 
-```
+```bash
+
 git clone git@github.com:pauldariye/.dotfiles.git # clone
 ./install.sh # setup environment
 
@@ -28,4 +28,3 @@ git clone git@github.com:pauldariye/.dotfiles.git # clone
 ### Dotfile manager
 
 - rcm
-
