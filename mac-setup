@@ -25,11 +25,14 @@ add_or_install_asdf_plugin() {
 install_asdf_language() {
   local language="$1"
   local version
+
+
   version="$(asdf list-all "$language" | grep -v "[a-z]" | tail -1)"
 
   if ! asdf list "$language" | grep -Fq "$version"; then
     asdf install "$language" "$version"
     asdf global "$language" "$version"
+    asdf reshim "$language"
   fi
 }
 
@@ -90,6 +93,7 @@ fancy_echo 'Setting up asdf...'
 # source "$HOME/.asdf/asdf.sh"
 add_or_install_asdf_plugin "ruby" "https://github.com/asdf-vm/asdf-ruby.git"
 add_or_install_asdf_plugin "nodejs" "https://github.com/asdf-vm/asdf-nodejs.git"
+add_or_install_asdf_plugin "python" "https://github.com/danhper/asdf-python.git"
 
 fancy_echo "💎Installing ruby..."
 install_asdf_language "ruby"
@@ -97,9 +101,15 @@ gem update --system
 number_of_cores=$(sysctl -n hw.ncpu)A
 bundle config --global jobs $((number_of_cores - 1))
 
-fancy_echo "Installing node..."
+fancy_echo "🗳Installing node..."
 bash "$HOME/.asdf/plugins/nodejs/bin/import-release-team-keyring"
 install_asdf_language "nodejs"
+
+fancy_echo "🐍Installing python..."
+asdf install python 3.6.2
+asdf install python 2.7.13
+asdf global python 3.6.2 2.7.13
+asdf reshim python
 
 fancy_echo "Done installinga asdf packages ✅"
 
@@ -108,13 +118,6 @@ fancy_echo "👽 Installing spacevim..."
 curl -sLf \
   'https://spacevim.org/install.sh' | bash -s -- --install neovim
 fancy_echo '👽 Spacevim setup successfully ✅'
-
-# Setup dotfiles
-fancy_echo '🗳Setting up dotfiles...'
-
-git clone git://github.com/pauldariye/.dotfiles.git ~/dotfiles
-env RCRC=$HOME/dotfiles/rcrc rcup
-source ~/.config/fish/config.fish
 
 # Setup Xcode
 fancy_echo 'Installing Xcode CLI tools...'
