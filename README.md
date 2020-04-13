@@ -5,19 +5,26 @@
 ## Installation
 
 
-### Setup up computer
+### Getting started
 
 ```bash
-
-git clone git@github.com:pauldariye/.dotfiles.git # clone
-./install.sh # setup environment
-
-```
-
-### Set up dotfiles
-
-```
 git clone git://github.com/pauldariye/.dotfiles.git ~/dotfiles
+```
+
+
+### Mac setup
+
+```bash
+cd ~/dotfiles
+./mac-setup
+
+```
+
+### Set up dotfiles manager
+
+This should be run after setup above is complete.
+
+```
 env RCRC=$HOME/dotfiles/rcrc rcup
 source ~/.config/fish/config.fish
 ```
