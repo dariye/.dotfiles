@@ -26,29 +26,39 @@ source ~/.config/fish/config.fish
 
 <details>
     <summary>Shell</summary>
-    - [fish](https://fishshell.com/) - fisher as pkg manager
-    - [spacefish](https://github.com/matchai/spacefish) - shell prompt
+    <ul>
+        <li><a href="https://fishshell.com/">fish</a> - fisher as pkg manager</li>
+        <li><a href="https://github.com/matchai/spacefish">spacefish</a>shell prompt</li>
+    </ul>
 </details>
 
 <details>
     <summary>Editors</summary>
-    - [spacevim](https://spacevim.org) w/ neovim
-    - [code](https://code.visualstudio.com/)
+    <ul>
+        <li><a href="https://spacevim.org">spacevim</a> w/ <a href="https://neovim.io/">neovim</a></li>
+        <li><a href="https://code.visualstudio.com/">code</a></li>
+    </ul>
 </details>
 
 <details>
     <summary>Package managers</summary>
-    - [brew](http://homebrew.sh/)
-    - [asdf](https://asdf-vm.com/)
+    <ul>
+        <li><a href="https://homebrew.sh/">brew</a></li>
+        <li><a href="https://asdf-vm.com">asdf</a></li>
+    </ul>
 </details>
 
 <details>
     <summary>Dotfile manager</summary>
-    - [rcm](http://thoughtbot.github.io/rcm/rcm.7.html)
+    <ul>
+        <li><a href="http://thoughtbot.github.io/rcm/rcm.7.html)">rcm</a></li>
+    </ul>
 </details>
 
 <details>
     <summary>Theme</summary>
-    - [nord](https://www.nordtheme.com/)
+    <ul>
+        <li><a href="https://www.nordtheme.com/">nord</a></li>
+    </ul>
 </details>
 
