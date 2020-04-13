@@ -1,6 +1,6 @@
 # .dotfiles
 
-![Screenshot](/master/screenshot.png?raw=true "Screenshot")
+![Screenshot](/screenshot.png?raw=true "Screenshot")
 
 ## Installation
 
