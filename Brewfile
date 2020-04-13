@@ -3,6 +3,8 @@ tap "homebrew/services"
 tap "universal-ctags/universal-ctags"
 tap "heroku/brew"
 tap "mongodb/brew"
+tap "homebrew/cask-versions"
+tap "nvie/tap"
 
 # brews
 brew "universal-ctags", args: ["HEAD"]
@@ -38,6 +40,7 @@ brew "libtool"
 brew "unixodbc"
 brew "unzip"
 brew "gpg"
+brew "ruby"
 brew "postgres", restart_service: :changed
 brew "redis", restart_service: :changed
 brew "mongodb-community"
