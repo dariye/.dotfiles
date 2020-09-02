@@ -47,6 +47,7 @@ brew "mongodb-community"
 brew "asdf"
 brew "fortune"
 brew "ponysay"
+brew "fd"
 
 # casks
 cask "ngrok"
