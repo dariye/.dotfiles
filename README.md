@@ -42,8 +42,8 @@ source ~/.config/fish/config.fish
 <details>
     <summary>Editors</summary>
     <ul>
-        <li><a href="https://spacevim.org">spacevim</a> w/ <a href="https://neovim.io/">neovim</a></li>
-        <li><a href="https://code.visualstudio.com/">code</a></li>
+        <li><a href="https://neovim.io">neovim</a></li>
+        <li><a href="https://zed.dev/">zed</a></li>
     </ul>
 </details>
 

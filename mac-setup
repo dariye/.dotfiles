@@ -2,7 +2,8 @@
 # This script is heavily adapted from Thoughtbot's awesome laptop setup script
 # Source: https://github.com/thoughtbot/laptop/blob/master/mac
 
-HOMEBREW_PREFIX="/usr/local"
+# For M1+s
+HOMEBREW_PREFIX="/opt/homebrew"
 ASDF_HOME="$HOME/.asdf"
 
 fancy_echo() {
@@ -59,9 +60,7 @@ fi
 
 if ! command -v brew >/dev/null; then 
   fancy_echo '🍺 Installing brew...'
-  curl -fsS \
-    'https://raw.githubusercontent.com/Homebrew/install/master/install' | ruby
-  
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
 if brew list | grep -Fq brew-cask; then 
@@ -75,16 +74,15 @@ brew bundle --file=./Brewfile
 
 fancy_echo "🍻 Your brews and casks have been successfully installed"
 
-fancy_echo "Update heroku binary ..."
-brew unlink heroku
-brew link --force heroku
 
 fancy_echo "🍺 Brew was successfully installed ✅"
 
 
 fancy_echo "🐠 Configuring fish as default shell..."
-echo "/usr/local/bin/fish" | sudo tee -a /etc/shells
-chsh -s /usr/local/bin/fish
+
+echo "$HOMEBREW_PREFIX/bin/fish" | sudo tee -a /etc/shells
+chsh -s "$HOMEBREW_PREFIX/bin/fish"
+
 fancy_echo "🐠 fish set as default shell"
 
 fancy_echo 'Setting up asdf...'
@@ -94,31 +92,40 @@ fancy_echo 'Setting up asdf...'
 add_or_install_asdf_plugin "ruby" "https://github.com/asdf-vm/asdf-ruby.git"
 add_or_install_asdf_plugin "nodejs" "https://github.com/asdf-vm/asdf-nodejs.git"
 add_or_install_asdf_plugin "python" "https://github.com/danhper/asdf-python.git"
+add_or_install_asdf_plugin "rust" "https://github.com/code-lever/asdf-rust.git"
+add_or_install_asdf_plugin "pnpm"
 
-fancy_echo "💎Installing ruby..."
+fancy_echo "💎 Installing ruby..."
 install_asdf_language "ruby"
-gem update --system
-number_of_cores=$(sysctl -n hw.ncpu)A
-bundle config --global jobs $((number_of_cores - 1))
 
-fancy_echo "🗳Installing node..."
-bash "$HOME/.asdf/plugins/nodejs/bin/import-release-team-keyring"
+fancy_echo "🗳 Installing node..."
 install_asdf_language "nodejs"
 
-fancy_echo "🐍Installing python..."
-asdf install python 3.6.2
-asdf install python 2.7.13
-asdf global python 3.6.2 2.7.13
-asdf reshim python
+fancy_echo "⚡️ Installing pnpm..."
+install_asdf_language "pnpm"
 
-fancy_echo "Done installinga asdf packages ✅"
+fancy_echo "R Installing rust..."
+install_asdf_language "rust"
 
-# Setup Spacevim
-fancy_echo "👽 Installing spacevim..."
-curl -sLf \
-  'https://spacevim.org/install.sh' | bash -s -- --install neovim
-fancy_echo '👽 Spacevim setup successfully ✅'
+fancy_echo "🐍 Installing python..."
+install_asdf_language "python"
+
+fancy_echo "Done installing asdf packages ✅"
+
 
 # Setup Xcode
-fancy_echo 'Installing Xcode CLI tools...'
-xcode-select --install
+
+fancy_echo "Checking Xcode CLI tools..."
+
+if ! command -v xcode-select -p; then
+ fancy_echo 'Installing Xcode CLI tools...'
+ xcode-select --install
+fi
+
+fancy_echo "Xcode CLI tools installed ✅"
+
+
+fancy_echo "Your basic tools are all setup 🚀"
+fancy_echo "follow the instructions in the README to complete the setup"
+
+

@@ -4,21 +4,15 @@ if not functions -q fisher
     fish -c fisher
 end
 
-set --local BREW_PREFIX (brew --prefix)
-
-set -g fish_user_paths "/usr/local/opt/gettext/bin" (yarn global bin) $fish_user_paths
-
-[ -f $BREW_PREFIX/opt/asdf/asdf.fish ]
-and source $BREW_PREFIX/opt/asdf/asdf.fish
-
 if type nvim >/dev/null 2>/dev/null
   alias vim='nvim'
   alias vi='nvim'
 end
 
-set -g fish_user_paths "/usr/local/sbin" $fish_user_paths
-set -g fish_user_paths "/usr/local/opt/ruby/bin" $fish_user_paths
-
 set -gx LC_ALL en_GB.UTF-8 
 set -gx LANG en_GB.UTF-8 
 
+
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+starship init fish | source
