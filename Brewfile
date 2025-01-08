@@ -38,10 +38,12 @@ brew "direnv"
 # casks
 cask "rectangle"
 cask "ngrok"
-cask "grammarly"
 cask "oracle-jdk"
 cask "skitch"
 cask "spotify"
 cask "enpass"
 cask "zed"
+# cask "ghostty"
+# cask "raycast"
+# cask "ollama"
 
