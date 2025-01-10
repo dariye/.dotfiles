@@ -11,8 +11,8 @@ if type nvim >/dev/null 2>/dev/null
   alias vi='nvim'
 end
 
-set -gx LC_ALL en_GB.UTF-8 
-set -gx LANG en_GB.UTF-8 
+set -gx LC_ALL en_GB.UTF-8
+set -gx LANG en_GB.UTF-8
 
 
 # asdf
@@ -39,13 +39,13 @@ end
 if status --is-interactive
     set BASE16_SHELL "$HOME/.config/base16-shell/"
     source "$BASE16_SHELL/profile_helper.fish"
+    base16-nord
 end
 
-# base16-nord
 
 direnv hook fish | source
 
-# 
+#
 starship init fish | source
 
 source /opt/homebrew/opt/asdf/libexec/asdf.fish
