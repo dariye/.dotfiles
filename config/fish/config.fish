@@ -14,21 +14,14 @@ end
 set -gx LC_ALL en_GB.UTF-8
 set -gx LANG en_GB.UTF-8
 
-
-# asdf
-# fisher install rstacruz/fish-asdf
-# https://github.com/rstacruz/fish-asdf
-# source "$HOME/.asdf/asdf.fish"
-
 eval "$(/opt/homebrew/bin/brew shellenv)"
-
 
 # bun
 set --export BUN_INSTALL "$HOME/.bun"
 set --export PATH $BUN_INSTALL/bin $PATH
 
 # pnpm
-set -gx PNPM_HOME "/Users/paul.dariye/Library/pnpm"
+set -gx PNPM_HOME "/Users/$HOME/Library/pnpm"
 if not string match -q -- $PNPM_HOME $PATH
   set -gx PATH "$PNPM_HOME" $PATH
 end
@@ -42,10 +35,6 @@ if status --is-interactive
     base16-nord
 end
 
-
 direnv hook fish | source
-
-#
-starship init fish | source
 
 source /opt/homebrew/opt/asdf/libexec/asdf.fish

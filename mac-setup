@@ -48,24 +48,24 @@ if [ ! -d "$HOME/.bin/" ]; then
   mkdir "$HOME/.bin"
 fi
 
-if [ -d "$HOMEBREW_PREFIX" ]; then 
-  if ! [ -r "$HOMEBREW_PREFIX" ]; then 
+if [ -d "$HOMEBREW_PREFIX" ]; then
+  if ! [ -r "$HOMEBREW_PREFIX" ]; then
     sudo chown - R "$LOGNAME:admin" /usr/local
-  fi 
-else 
+  fi
+else
   sudo mkdir "$HOMEBREW_PREFIX"
   sudo chflags norestricted "$HOMEBREW_PREFIX"
   sudo chown -R "$LOGNAME:admin" "$HOMEBREW_PREFIX"
-fi 
+fi
 
-if ! command -v brew >/dev/null; then 
+if ! command -v brew >/dev/null; then
   fancy_echo '🍺 Installing brew...'
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-if brew list | grep -Fq brew-cask; then 
+if brew list | grep -Fq brew-cask; then
   fancy_echo "✂️  Uninstalling old homebrew cask ..."
-  brew uninstall --force brew-cask 
+  brew uninstall --force brew-cask
 fi
 
 fancy_echo "🍻 Updating homebrew formulae..."
@@ -129,4 +129,7 @@ fancy_echo "Xcode CLI tools installed ✅"
 fancy_echo "Your basic tools are all setup 🚀"
 fancy_echo "follow the instructions in the README to complete the setup"
 
-
+# a few things to add
+# https://github.com/powerline/fonts
+# https://github.com/jorgebucaran/fisher/issues/652#issue-788115513
+# https://ghostty.org/docs/config -- config for theme, for font-family

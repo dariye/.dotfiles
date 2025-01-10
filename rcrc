@@ -1,3 +1,2 @@
-
-EXCLUDES="README*.md LICENSE .git* mac-setup Brewfile Brewfile.lock.json screenshot.png"
-DOTFILES_DIRS="$HOME/dotfiles"
+EXCLUDES="README*.md .gitignore LICENSE .git* mac-setup Brewfile Brewfile.lock.json screenshot.png"
+DOTFILES_DIRS="$HOME/.dotfiles"

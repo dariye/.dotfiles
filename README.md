@@ -8,7 +8,7 @@
 ### Getting started
 
 ```bash
-git clone git://github.com/pauldariye/.dotfiles.git ~/dotfiles
+git clone git://github.com/pauldariye/.dotfiles.git ~/.dotfiles
 ```
 
 
@@ -32,6 +32,20 @@ source ~/.config/fish/config.fish
 ## Programs
 
 <details>
+    <summary>Terminal</summary>
+    <ul>
+        <li><a href="https://ghostty.org/">Ghostty</a></li>
+    </ul>
+
+    <details>
+        <summary>Theme</summary>
+        <ul>
+            <li><a href="https://www.nordtheme.com/">nord</a></li>
+        </ul>
+    </details>
+</details>
+
+<details>
     <summary>Shell</summary>
     <ul>
         <li><a href="https://fishshell.com/">fish</a> - fisher as pkg manager</li>
@@ -45,6 +59,12 @@ source ~/.config/fish/config.fish
         <li><a href="https://neovim.io">neovim</a></li>
         <li><a href="https://zed.dev/">zed</a></li>
     </ul>
+    <details>
+        <summary>Theme</summary>
+        <ul>
+            <li><a href="https://www.nordtheme.com/">nord</a></li>
+        </ul>
+    </details>
 </details>
 
 <details>
@@ -61,11 +81,3 @@ source ~/.config/fish/config.fish
         <li><a href="http://thoughtbot.github.io/rcm/rcm.7.html)">rcm</a></li>
     </ul>
 </details>
-
-<details>
-    <summary>Theme</summary>
-    <ul>
-        <li><a href="https://www.nordtheme.com/">nord</a></li>
-    </ul>
-</details>
-

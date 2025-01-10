@@ -23,7 +23,6 @@ brew "ponysay"
 brew "rcm"
 brew "redis"
 brew "ruby", link: true
-brew "starship"
 brew "tig"
 brew "tldr"
 brew "universal-ctags", args: ["HEAD"]
