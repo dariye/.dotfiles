@@ -36,7 +36,6 @@ source ~/.config/fish/config.fish
     <ul>
         <li><a href="https://ghostty.org/">Ghostty</a></li>
     </ul>
-
     <details>
         <summary>Theme</summary>
         <ul>
