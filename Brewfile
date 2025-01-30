@@ -5,6 +5,7 @@ tap "homebrew/cask-fonts"
 brew "bat"
 brew "mas"
 brew "neovim"
+brew "starship"
 brew "ruby", link: true
 brew "cocoapods"
 brew "direnv"

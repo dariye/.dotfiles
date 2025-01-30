@@ -1,84 +1,93 @@
 #!/bin/bash
-# This script is heavily adapted from Thoughtbot's awesome laptop setup script
+# This script is heavily adapted from Thoughtbot's laptop setup script
 # Source: https://github.com/thoughtbot/laptop/blob/master/mac
 
 HOMEBREW_PREFIX="/opt/homebrew"
 
 fancy_echo() {
   local fmt="$1"; shift
-  # shellcheck disable=SC2059
   printf "\\n$fmt\\n" "$@"
 }
 
-fancy_echo "Starting up..."
+fancy_echo "► Starting setup..."
 
-# shellcheck disable=SC2154
 trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
 set -e
 
+# Create necessary directories
 if [ ! -d "$HOME/.bin/" ]; then
   mkdir "$HOME/.bin"
 fi
 
+# Setup Homebrew directory permissions
 if [ -d "$HOMEBREW_PREFIX" ]; then
   if ! [ -r "$HOMEBREW_PREFIX" ]; then
-    sudo chown - R "$LOGNAME:admin" /usr/local
+    sudo chown -R "$USER:admin" "$HOMEBREW_PREFIX"
   fi
 else
   sudo mkdir "$HOMEBREW_PREFIX"
   sudo chflags norestricted "$HOMEBREW_PREFIX"
-  sudo chown -R "$LOGNAME:admin" "$HOMEBREW_PREFIX"
+  sudo chown -R "$USER:admin" "$HOMEBREW_PREFIX"
 fi
 
+# Install Homebrew if needed
 if ! command -v brew >/dev/null; then
-  fancy_echo '🍺 Installing brew...'
+  fancy_echo "► Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
+# Clean up old cask if present
 if brew list | grep -Fq brew-cask; then
-  fancy_echo "✂️  Uninstalling old homebrew cask ..."
+  fancy_echo "► Cleaning up old Homebrew-Cask..."
   brew uninstall --force brew-cask
 fi
 
-fancy_echo "🍻 Updating homebrew formulae..."
-brew bundle dump --force
+fancy_echo "► Updating Homebrew..."
+brew update
 
-
-fancy_echo "🍻 Installing your packages from Brewfile..."
-
-brew bundle --file=./Brewfile
-
-fancy_echo "🍺 Brew was successfully installed ✅"
-
-fancy_echo "🐠 Configuring fish as default shell..."
-
-echo "$HOMEBREW_PREFIX/bin/fish" | sudo tee -a /etc/shells
-chsh -s "$HOMEBREW_PREFIX/bin/fish"
-
-fancy_echo "🐠 fish set as default shell"
-
-fancy_echo "📦 Installing fisher and packages..."
-
-set --local plugins (read --null ./config/fish/fishfile)
-curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher $plugins
-
-fancy_echo "📦 fisher and packages installed"
-
-# Setup Xcode
-fancy_echo "Checking Xcode CLI tools..."
-
-if ! command -v xcode-select -p; then
- fancy_echo 'Installing Xcode CLI tools...'
- xcode-select --install
+fancy_echo "► Installing packages from Brewfile..."
+if [ -f "./Brewfile" ]; then
+  brew bundle --file=./Brewfile
+else
+  fancy_echo "Note: No Brewfile found in current directory"
 fi
 
-fancy_echo "Xcode CLI tools installed ✅"
+fancy_echo "► Configuring fish shell..."
+# Ensure fish shell is available in /etc/shells
+if ! grep -q "$HOMEBREW_PREFIX/bin/fish" /etc/shells; then
+  echo "$HOMEBREW_PREFIX/bin/fish" | sudo tee -a /etc/shells
+fi
 
-fancy_echo "Your basic tools are all setup 🚀"
-fancy_echo "follow the instructions in the README to complete the setup"
+# Set fish as default shell if it isn't already
+if [ "$SHELL" != "$HOMEBREW_PREFIX/bin/fish" ]; then
+  chsh -s "$HOMEBREW_PREFIX/bin/fish"
+fi
 
-# a few things to add
-# https://github.com/powerline/fonts
-# https://github.com/jorgebucaran/fisher/issues/652#issue-788115513
-# https://ghostty.org/docs/config -- config for theme, for font-family
+fancy_echo "► Setting up fish plugins..."
+# Store current plugins from fishfile if it exists
+if [ -f "./config/fish/fishfile" ]; then
+  FISH_PLUGINS=$(tr '\n' ' ' < "./config/fish/fishfile")
+  fancy_echo "► Found fishfile, will restore: $FISH_PLUGINS"
+else
+  FISH_PLUGINS=""
+  fancy_echo "Note: No fishfile found in dotfiles"
+fi
+
+# Install fisher and restore plugins
+fancy_echo "► Installing fisher and plugins..."
+fish -c "curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher $FISH_PLUGINS"
+
+# Setup Xcode Command Line Tools
+fancy_echo "► Checking Xcode CLI tools..."
+if ! xcode-select -p &>/dev/null; then
+  fancy_echo "► Installing Xcode Command Line Tools..."
+  xcode-select --install
+
+  until xcode-select -p &>/dev/null; do
+    sleep 5
+  done
+fi
+
+fancy_echo "✓ Setup complete!"
+fancy_echo "Note: Please restart your terminal to apply all changes"
