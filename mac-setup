@@ -2,39 +2,12 @@
 # This script is heavily adapted from Thoughtbot's awesome laptop setup script
 # Source: https://github.com/thoughtbot/laptop/blob/master/mac
 
-# For M1+s
 HOMEBREW_PREFIX="/opt/homebrew"
-ASDF_HOME="$HOME/.asdf"
 
 fancy_echo() {
   local fmt="$1"; shift
   # shellcheck disable=SC2059
   printf "\\n$fmt\\n" "$@"
-}
-
-add_or_install_asdf_plugin() {
-  local name="$1"
-  local url="$2"
-
-  if ! asdf plugin-list | grep -Fq "$name"; then
-    asdf plugin-add "$name" "$url"
-   else
-     asdf plugin-update "$name"
-  fi
-}
-
-install_asdf_language() {
-  local language="$1"
-  local version
-
-
-  version="$(asdf list-all "$language" | grep -v "[a-z]" | tail -1)"
-
-  if ! asdf list "$language" | grep -Fq "$version"; then
-    asdf install "$language" "$version"
-    asdf global "$language" "$version"
-    asdf reshim "$language"
-  fi
 }
 
 fancy_echo "Starting up..."
@@ -70,14 +43,13 @@ fi
 
 fancy_echo "🍻 Updating homebrew formulae..."
 brew bundle dump --force
-brew update --force  # https://github.com/Homebrew/brew/issues/1151
+
+
+fancy_echo "🍻 Installing your packages from Brewfile..."
+
 brew bundle --file=./Brewfile
 
-fancy_echo "🍻 Your brews and casks have been successfully installed"
-
-
 fancy_echo "🍺 Brew was successfully installed ✅"
-
 
 fancy_echo "🐠 Configuring fish as default shell..."
 
@@ -86,36 +58,14 @@ chsh -s "$HOMEBREW_PREFIX/bin/fish"
 
 fancy_echo "🐠 fish set as default shell"
 
-fancy_echo 'Setting up asdf...'
+fancy_echo "📦 Installing fisher and packages..."
 
-# # shellcheck disable=SC1090
-# source "$HOME/.asdf/asdf.sh"
-add_or_install_asdf_plugin "ruby" "https://github.com/asdf-vm/asdf-ruby.git"
-add_or_install_asdf_plugin "nodejs" "https://github.com/asdf-vm/asdf-nodejs.git"
-add_or_install_asdf_plugin "python" "https://github.com/danhper/asdf-python.git"
-add_or_install_asdf_plugin "rust" "https://github.com/code-lever/asdf-rust.git"
-add_or_install_asdf_plugin "pnpm"
+set --local plugins (read --null ./config/fish/fishfile)
+curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher $plugins
 
-fancy_echo "💎 Installing ruby..."
-install_asdf_language "ruby"
-
-fancy_echo "🗳 Installing node..."
-install_asdf_language "nodejs"
-
-fancy_echo "⚡️ Installing pnpm..."
-install_asdf_language "pnpm"
-
-fancy_echo "R Installing rust..."
-install_asdf_language "rust"
-
-fancy_echo "🐍 Installing python..."
-install_asdf_language "python"
-
-fancy_echo "Done installing asdf packages ✅"
-
+fancy_echo "📦 fisher and packages installed"
 
 # Setup Xcode
-
 fancy_echo "Checking Xcode CLI tools..."
 
 if ! command -v xcode-select -p; then
@@ -124,7 +74,6 @@ if ! command -v xcode-select -p; then
 fi
 
 fancy_echo "Xcode CLI tools installed ✅"
-
 
 fancy_echo "Your basic tools are all setup 🚀"
 fancy_echo "follow the instructions in the README to complete the setup"

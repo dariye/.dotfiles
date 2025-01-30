@@ -38,3 +38,5 @@ end
 direnv hook fish | source
 
 source /opt/homebrew/opt/asdf/libexec/asdf.fish
+
+source "$HOME/workspace/pleo/scripts/bin/oo.fish"
