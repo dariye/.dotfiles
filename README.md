@@ -8,7 +8,7 @@
 ### Getting started
 
 ```bash
-git clone git://github.com/pauldariye/.dotfiles.git ~/.dotfiles
+git clone git://github.com/dariye/.dotfiles.git
 ```
 
 
