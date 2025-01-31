@@ -91,4 +91,4 @@ if ! xcode-select -p &>/dev/null; then
 fi
 
 fancy_echo "✓ Setup complete!"
-fancy_echo "Note: Please restart your terminal to apply all changes"
+fancy_echo "Restart terminal to apply all changes"
