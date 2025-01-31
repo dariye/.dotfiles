@@ -44,7 +44,6 @@ if brew list | grep -Fq brew-cask; then
 fi
 
 fancy_echo "► Updating Homebrew..."
-brew bundle dump --force
 brew update
 
 fancy_echo "► Installing packages from Brewfile..."
