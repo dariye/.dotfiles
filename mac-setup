@@ -23,12 +23,12 @@ fi
 # Setup Homebrew directory permissions
 if [ -d "$HOMEBREW_PREFIX" ]; then
   if ! [ -r "$HOMEBREW_PREFIX" ]; then
-    sudo chown -R "$USER:admin" "$HOMEBREW_PREFIX"
+    sudo chown - R "$LOGNAME:admin" /usr/local
   fi
 else
   sudo mkdir "$HOMEBREW_PREFIX"
   sudo chflags norestricted "$HOMEBREW_PREFIX"
-  sudo chown -R "$USER:admin" "$HOMEBREW_PREFIX"
+  sudo chown -R "$LOGNAME:admin" "$HOMEBREW_PREFIX"
 fi
 
 # Install Homebrew if needed
@@ -44,6 +44,7 @@ if brew list | grep -Fq brew-cask; then
 fi
 
 fancy_echo "► Updating Homebrew..."
+brew bundle dump --force
 brew update
 
 fancy_echo "► Installing packages from Brewfile..."
