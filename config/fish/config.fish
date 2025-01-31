@@ -1,5 +1,6 @@
 set -U fish_greeting
 
+# setup fisher
 if not functions -q fisher
     set -q XDG_CONFIG_HOME; or set XDG_CONFIG_HOME ~/.config
     curl https://git.io/fisher --create-dirs -sLo $XDG_CONFIG_HOME/fish/functions/fisher.fish
@@ -27,14 +28,5 @@ if not string match -q -- $PNPM_HOME $PATH
 end
 # pnpm end
 
-# Base16 Shell
-# git clone https://github.com/chriskempson/base16-shell.git ~/.config/base16-shell
-if status --is-interactive
-    set BASE16_SHELL "$HOME/.config/base16-shell/"
-    source "$BASE16_SHELL/profile_helper.fish"
-    base16-nord
-end
-
 direnv hook fish | source
-
-source /opt/homebrew/opt/asdf/libexec/asdf.fish
+starship init fish | source

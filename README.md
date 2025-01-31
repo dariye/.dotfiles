@@ -8,7 +8,7 @@
 ### Getting started
 
 ```bash
-git clone git://github.com/pauldariye/.dotfiles.git ~/.dotfiles
+git clone git://github.com/dariye/.dotfiles.git
 ```
 
 
@@ -48,7 +48,7 @@ source ~/.config/fish/config.fish
     <summary>Shell</summary>
     <ul>
         <li><a href="https://fishshell.com/">fish</a> - fisher as pkg manager</li>
-        <li><a href="https://github.com/matchai/spacefish">spacefish</a>shell prompt</li>
+        <li><a href="https://starship.rs">starship - </a>shell prompt with <a href="https://starship.rs/presets/pure-preset">pure preset</a></li>
     </ul>
 </details>
 

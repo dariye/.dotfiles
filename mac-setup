@@ -1,53 +1,26 @@
 #!/bin/bash
-# This script is heavily adapted from Thoughtbot's awesome laptop setup script
+# This script is heavily adapted from Thoughtbot's laptop setup script
 # Source: https://github.com/thoughtbot/laptop/blob/master/mac
 
-# For M1+s
 HOMEBREW_PREFIX="/opt/homebrew"
-ASDF_HOME="$HOME/.asdf"
 
 fancy_echo() {
   local fmt="$1"; shift
-  # shellcheck disable=SC2059
   printf "\\n$fmt\\n" "$@"
 }
 
-add_or_install_asdf_plugin() {
-  local name="$1"
-  local url="$2"
+fancy_echo "► Starting setup..."
 
-  if ! asdf plugin-list | grep -Fq "$name"; then
-    asdf plugin-add "$name" "$url"
-   else
-     asdf plugin-update "$name"
-  fi
-}
-
-install_asdf_language() {
-  local language="$1"
-  local version
-
-
-  version="$(asdf list-all "$language" | grep -v "[a-z]" | tail -1)"
-
-  if ! asdf list "$language" | grep -Fq "$version"; then
-    asdf install "$language" "$version"
-    asdf global "$language" "$version"
-    asdf reshim "$language"
-  fi
-}
-
-fancy_echo "Starting up..."
-
-# shellcheck disable=SC2154
 trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
 set -e
 
+# Create necessary directories
 if [ ! -d "$HOME/.bin/" ]; then
   mkdir "$HOME/.bin"
 fi
 
+# Setup Homebrew directory permissions
 if [ -d "$HOMEBREW_PREFIX" ]; then
   if ! [ -r "$HOMEBREW_PREFIX" ]; then
     sudo chown - R "$LOGNAME:admin" /usr/local
@@ -58,78 +31,63 @@ else
   sudo chown -R "$LOGNAME:admin" "$HOMEBREW_PREFIX"
 fi
 
+# Install Homebrew if needed
 if ! command -v brew >/dev/null; then
-  fancy_echo '🍺 Installing brew...'
+  fancy_echo "► Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
+# Clean up old cask if present
 if brew list | grep -Fq brew-cask; then
-  fancy_echo "✂️  Uninstalling old homebrew cask ..."
+  fancy_echo "► Cleaning up old Homebrew-Cask..."
   brew uninstall --force brew-cask
 fi
 
-fancy_echo "🍻 Updating homebrew formulae..."
-brew bundle dump --force
-brew update --force  # https://github.com/Homebrew/brew/issues/1151
-brew bundle --file=./Brewfile
+fancy_echo "► Updating Homebrew..."
+brew update
 
-fancy_echo "🍻 Your brews and casks have been successfully installed"
-
-
-fancy_echo "🍺 Brew was successfully installed ✅"
-
-
-fancy_echo "🐠 Configuring fish as default shell..."
-
-echo "$HOMEBREW_PREFIX/bin/fish" | sudo tee -a /etc/shells
-chsh -s "$HOMEBREW_PREFIX/bin/fish"
-
-fancy_echo "🐠 fish set as default shell"
-
-fancy_echo 'Setting up asdf...'
-
-# # shellcheck disable=SC1090
-# source "$HOME/.asdf/asdf.sh"
-add_or_install_asdf_plugin "ruby" "https://github.com/asdf-vm/asdf-ruby.git"
-add_or_install_asdf_plugin "nodejs" "https://github.com/asdf-vm/asdf-nodejs.git"
-add_or_install_asdf_plugin "python" "https://github.com/danhper/asdf-python.git"
-add_or_install_asdf_plugin "rust" "https://github.com/code-lever/asdf-rust.git"
-add_or_install_asdf_plugin "pnpm"
-
-fancy_echo "💎 Installing ruby..."
-install_asdf_language "ruby"
-
-fancy_echo "🗳 Installing node..."
-install_asdf_language "nodejs"
-
-fancy_echo "⚡️ Installing pnpm..."
-install_asdf_language "pnpm"
-
-fancy_echo "R Installing rust..."
-install_asdf_language "rust"
-
-fancy_echo "🐍 Installing python..."
-install_asdf_language "python"
-
-fancy_echo "Done installing asdf packages ✅"
-
-
-# Setup Xcode
-
-fancy_echo "Checking Xcode CLI tools..."
-
-if ! command -v xcode-select -p; then
- fancy_echo 'Installing Xcode CLI tools...'
- xcode-select --install
+fancy_echo "► Installing packages from Brewfile..."
+if [ -f "./Brewfile" ]; then
+  brew bundle --file=./Brewfile
+else
+  fancy_echo "Note: No Brewfile found in current directory"
 fi
 
-fancy_echo "Xcode CLI tools installed ✅"
+fancy_echo "► Configuring fish shell..."
+# Ensure fish shell is available in /etc/shells
+if ! grep -q "$HOMEBREW_PREFIX/bin/fish" /etc/shells; then
+  echo "$HOMEBREW_PREFIX/bin/fish" | sudo tee -a /etc/shells
+fi
 
+# Set fish as default shell if it isn't already
+if [ "$SHELL" != "$HOMEBREW_PREFIX/bin/fish" ]; then
+  chsh -s "$HOMEBREW_PREFIX/bin/fish"
+fi
 
-fancy_echo "Your basic tools are all setup 🚀"
-fancy_echo "follow the instructions in the README to complete the setup"
+fancy_echo "► Setting up fish plugins..."
+# Store current plugins from fishfile if it exists
+if [ -f "./config/fish/fishfile" ]; then
+  FISH_PLUGINS=$(tr '\n' ' ' < "./config/fish/fishfile")
+  fancy_echo "► Found fishfile, will restore: $FISH_PLUGINS"
+else
+  FISH_PLUGINS=""
+  fancy_echo "Note: No fishfile found in dotfiles"
+fi
 
-# a few things to add
-# https://github.com/powerline/fonts
-# https://github.com/jorgebucaran/fisher/issues/652#issue-788115513
-# https://ghostty.org/docs/config -- config for theme, for font-family
+# Install fisher and restore plugins
+fancy_echo "► Installing fisher and plugins..."
+fish -c "curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher $FISH_PLUGINS"
+
+# Setup Xcode Command Line Tools
+fancy_echo "► Checking Xcode CLI tools..."
+if ! xcode-select -p &>/dev/null; then
+  fancy_echo "► Installing Xcode Command Line Tools..."
+  xcode-select --install
+
+  until xcode-select -p &>/dev/null; do
+    sleep 5
+  done
+fi
+
+fancy_echo "✓ Setup complete!"
+fancy_echo "Restart terminal to apply all changes"
