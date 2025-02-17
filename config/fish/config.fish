@@ -14,27 +14,23 @@ end
 set -gx LC_ALL en_GB.UTF-8
 set -gx LANG en_GB.UTF-8
 
+# load shell env
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# bun
-set --export BUN_INSTALL "$HOME/.bun"
-set --export PATH $BUN_INSTALL/bin $PATH
-
-# pnpm
-set -gx PNPM_HOME "/Users/$HOME/Library/pnpm"
-if not string match -q -- $PNPM_HOME $PATH
-  set -gx PATH "$PNPM_HOME" $PATH
+# asdf -- https://asdf-vm.com/guide/getting-started.html
+if test -z $ASDF_DATA_DIR
+    set _asdf_shims "$HOME/.asdf/shims"
+else
+    set _asdf_shims "$ASDF_DATA_DIR/shims"
 end
-# pnpm end
 
-# Base16 Shell
-# git clone https://github.com/chriskempson/base16-shell.git ~/.config/base16-shell
-if status --is-interactive
-    set BASE16_SHELL "$HOME/.config/base16-shell/"
-    source "$BASE16_SHELL/profile_helper.fish"
-    base16-nord
+# Do not use fish_add_path (added in Fish 3.2) because it
+# potentially changes the order of items in PATH
+if not contains $_asdf_shims $PATH
+    set -gx --prepend PATH $_asdf_shims
 end
+set --erase _asdf_shims
 
 direnv hook fish | source
 
-source /opt/homebrew/opt/asdf/libexec/asdf.fish
+starship init fish | source
