@@ -1,135 +1,144 @@
 #!/bin/bash
-# This script is heavily adapted from Thoughtbot's awesome laptop setup script
-# Source: https://github.com/thoughtbot/laptop/blob/master/mac
+# Optimized for M3 MacBook Pro
+# Based on Thoughtbot's laptop script and original setup
 
-# For M1+s
+# Constants
 HOMEBREW_PREFIX="/opt/homebrew"
 ASDF_HOME="$HOME/.asdf"
+XDG_CONFIG_HOME="$HOME/.config"
+
+# Improved error handling
+set -euo pipefail
+IFS=$'\n\t'
 
 fancy_echo() {
   local fmt="$1"; shift
-  # shellcheck disable=SC2059
-  printf "\\n$fmt\\n" "$@"
+  printf "\\n%b\\n" "$fmt"
 }
 
+# Verify M3/ARM architecture
+if [ "$(uname -m)" != "arm64" ]; then
+  fancy_echo "⚠️  This script is optimized for Apple Silicon (M-series) Macs"
+  exit 1
+fi
+
+if [ "$(sw_vers -productVersion | cut -d. -f1)" -lt "14" ]; then
+  fancy_echo "⚠️  This script requires macOS Sonoma (14.0) or later"
+  exit 1
+fi
+
+# Create necessary directories
+mkdir -p "$HOME/.bin"
+mkdir -p "$XDG_CONFIG_HOME"
+
+# Homebrew setup with proper permissions
+if [ -d "$HOMEBREW_PREFIX" ]; then
+  if ! [ -r "$HOMEBREW_PREFIX" ]; then
+    sudo chown -R "$USER:admin" "$HOMEBREW_PREFIX"
+  fi
+else
+  sudo mkdir -p "$HOMEBREW_PREFIX"
+  sudo chown -R "$USER:admin" "$HOMEBREW_PREFIX"
+fi
+
+# Install Homebrew if needed
+if ! command -v brew >/dev/null; then
+  fancy_echo "🍺 Installing Homebrew..."
+  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+# Install Xcode Command Line Tools
+if ! xcode-select -p &>/dev/null; then
+  fancy_echo "Installing Xcode Command Line Tools..."
+  xcode-select --install
+
+  # Wait for installation to complete
+  until xcode-select -p &>/dev/null; do
+    sleep 5
+  done
+fi
+
+clean_asdf_installation() {
+  fancy_echo "🧹 Cleaning existing ASDF installation..."
+
+  # Remove existing ASDF directory if it exists
+  if [ -d "$ASDF_HOME" ]; then
+    rm -rf "$ASDF_HOME"
+  fi
+
+  # Ensure clean ASDF installation
+  brew uninstall asdf --force 2>/dev/null || true
+  brew install asdf
+
+  # Create fresh ASDF directory
+  mkdir -p "$ASDF_HOME"
+
+  # Source ASDF
+  # source "$(brew --prefix asdf)/libexec/asdf.sh"
+}
+
+# ASDF Plugin Management with cleanup
 add_or_install_asdf_plugin() {
   local name="$1"
   local url="$2"
+  local plugin_dir="$ASDF_HOME/plugins/$name"
 
-  if ! asdf plugin-list | grep -Fq "$name"; then
-    asdf plugin-add "$name" "$url"
-   else
-     asdf plugin-update "$name"
+  # Clean existing plugin if present
+  if [ -d "$plugin_dir" ]; then
+    rm -rf "$plugin_dir"
   fi
+
+  fancy_echo "🔌 Installing $name plugin..."
+  asdf plugin add "$name" "$url"
 }
 
+# Optimized language installation
 install_asdf_language() {
   local language="$1"
   local version
 
+  if [ "$2" = "latest" ]; then
+    version="$(asdf latest "$language")"
+  else
+    version="$2"
+  fi
 
-  version="$(asdf list-all "$language" | grep -v "[a-z]" | tail -1)"
-
-  if ! asdf list "$language" | grep -Fq "$version"; then
+  if ! asdf list "$language" 2>/dev/null | grep -Fq "$version"; then
     asdf install "$language" "$version"
     asdf global "$language" "$version"
-    asdf reshim "$language"
   fi
 }
 
-fancy_echo "Starting up..."
-
-# shellcheck disable=SC2154
-trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
-
-set -e
-
-if [ ! -d "$HOME/.bin/" ]; then
-  mkdir "$HOME/.bin"
-fi
-
-if [ -d "$HOMEBREW_PREFIX" ]; then
-  if ! [ -r "$HOMEBREW_PREFIX" ]; then
-    sudo chown - R "$LOGNAME:admin" /usr/local
-  fi
-else
-  sudo mkdir "$HOMEBREW_PREFIX"
-  sudo chflags norestricted "$HOMEBREW_PREFIX"
-  sudo chown -R "$LOGNAME:admin" "$HOMEBREW_PREFIX"
-fi
-
-if ! command -v brew >/dev/null; then
-  fancy_echo '🍺 Installing brew...'
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-fi
-
-if brew list | grep -Fq brew-cask; then
-  fancy_echo "✂️  Uninstalling old homebrew cask ..."
-  brew uninstall --force brew-cask
-fi
-
-fancy_echo "🍻 Updating homebrew formulae..."
-brew bundle dump --force
-brew update --force  # https://github.com/Homebrew/brew/issues/1151
+# Update Homebrew and install packages
+fancy_echo "🍻 Updating Homebrew formulae..."
+brew update
 brew bundle --file=./Brewfile
 
-fancy_echo "🍻 Your brews and casks have been successfully installed"
-
-
-fancy_echo "🍺 Brew was successfully installed ✅"
-
-
-fancy_echo "🐠 Configuring fish as default shell..."
-
-echo "$HOMEBREW_PREFIX/bin/fish" | sudo tee -a /etc/shells
+# Configure fish shell
+fancy_echo "🐠 Setting up fish shell..."
+if ! grep -q "$HOMEBREW_PREFIX/bin/fish" /etc/shells; then
+  echo "$HOMEBREW_PREFIX/bin/fish" | sudo tee -a /etc/shells
+fi
 chsh -s "$HOMEBREW_PREFIX/bin/fish"
 
-fancy_echo "🐠 fish set as default shell"
+# ASDF setup
+fancy_echo "Setting up asdf package manager..."
 
-fancy_echo 'Setting up asdf...'
-
-# # shellcheck disable=SC1090
-# source "$HOME/.asdf/asdf.sh"
+# Clean and reinstall ASDF
+clean_asdf_installation
+# Install language versions
 add_or_install_asdf_plugin "ruby" "https://github.com/asdf-vm/asdf-ruby.git"
 add_or_install_asdf_plugin "nodejs" "https://github.com/asdf-vm/asdf-nodejs.git"
 add_or_install_asdf_plugin "python" "https://github.com/danhper/asdf-python.git"
 add_or_install_asdf_plugin "rust" "https://github.com/code-lever/asdf-rust.git"
-add_or_install_asdf_plugin "pnpm"
+add_or_install_asdf_plugin "pnpm" "https://github.com/jonathanmorley/asdf-pnpm.git"
 
-fancy_echo "💎 Installing ruby..."
-install_asdf_language "ruby"
+# Install latest versions of languages
+install_asdf_language "ruby" "latest"
+install_asdf_language "nodejs" "latest"
+install_asdf_language "python" "3.11.7"
+install_asdf_language "rust" "latest"
+install_asdf_language "pnpm" "latest"
 
-fancy_echo "🗳 Installing node..."
-install_asdf_language "nodejs"
-
-fancy_echo "⚡️ Installing pnpm..."
-install_asdf_language "pnpm"
-
-fancy_echo "R Installing rust..."
-install_asdf_language "rust"
-
-fancy_echo "🐍 Installing python..."
-install_asdf_language "python"
-
-fancy_echo "Done installing asdf packages ✅"
-
-
-# Setup Xcode
-
-fancy_echo "Checking Xcode CLI tools..."
-
-if ! command -v xcode-select -p; then
- fancy_echo 'Installing Xcode CLI tools...'
- xcode-select --install
-fi
-
-fancy_echo "Xcode CLI tools installed ✅"
-
-
-fancy_echo "Your basic tools are all setup 🚀"
-fancy_echo "follow the instructions in the README to complete the setup"
-
-# a few things to add
-# https://github.com/powerline/fonts
-# https://github.com/jorgebucaran/fisher/issues/652#issue-788115513
-# https://ghostty.org/docs/config -- config for theme, for font-family
+fancy_echo "✅ Setup complete!"

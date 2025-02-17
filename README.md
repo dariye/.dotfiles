@@ -2,34 +2,35 @@
 
 ![Screenshot](/screenshot.png?raw=true "Screenshot")
 
-## Installation
+Laptop setup for my Apple Silicon Mac (M1) running macOS Sonoma or later.
 
+## Prerequisites
+
+- Apple Silicon Mac (M1 or later)
+- macOS Sonoma or later
+- Internet connection
 
 ### Getting started
 
 ```bash
+# clone repository
 git clone git://github.com/pauldariye/.dotfiles.git ~/.dotfiles
-```
-
-
-### Mac setup
-
-```bash
 cd ~/dotfiles
+
+# make setup script executable
+chmod +x mac-setup
+
+# run setup script
 ./mac-setup
 
-```
-
-### Set up dotfiles manager
-
-This should be run after setup above is complete.
-
-```
-env RCRC=$HOME/dotfiles/rcrc rcup
+# Setup dotfiles (after mac-setup completes)
+env RCRC=$HOME/.dotfiles/rcrc rcup
 source ~/.config/fish/config.fish
 ```
 
-## Programs
+
+## My programs
+Some of these are not installed using the setup script. I install them manually (for now).
 
 <details>
     <summary>Terminal</summary>
