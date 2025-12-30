@@ -64,7 +64,7 @@ Some of these are not installed using the setup script. I install them manually 
     <summary>Package managers</summary>
     <ul>
         <li><a href="https://homebrew.sh/">brew</a></li>
-        <li><a href="https://asdf-vm.com">asdf</a></li>
+        <li><a href="https://mise.jdx.dev">mise</a></li>
     </ul>
 </details>
 
