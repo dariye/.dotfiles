@@ -2,11 +2,9 @@
 # Optimized for Apple Silicon Mac (M-series)
 # Based on Thoughtbot's laptop script and original setup
 
-# Constants
 HOMEBREW_PREFIX="/opt/homebrew"
 XDG_CONFIG_HOME="$HOME/.config"
 
-# Improved error handling
 set -euo pipefail
 IFS=$'\n\t'
 
@@ -14,7 +12,6 @@ fancy_echo() {
   printf "\\n%b\\n" "$1"
 }
 
-# Verify ARM architecture
 if [ "$(uname -m)" != "arm64" ]; then
   fancy_echo "⚠️  This script is optimized for Apple Silicon (M-series) Macs"
   exit 1
@@ -25,10 +22,8 @@ if [ "$(sw_vers -productVersion | cut -d. -f1)" -lt "14" ]; then
   exit 1
 fi
 
-# Create necessary directories
 mkdir -p "$XDG_CONFIG_HOME"
 
-# Homebrew setup with proper permissions
 if [ -d "$HOMEBREW_PREFIX" ]; then
   if ! [ -r "$HOMEBREW_PREFIX" ]; then
     sudo chown -R "$USER:admin" "$HOMEBREW_PREFIX"
@@ -38,33 +33,25 @@ else
   sudo chown -R "$USER:admin" "$HOMEBREW_PREFIX"
 fi
 
-# Install Homebrew if needed
 if ! command -v brew >/dev/null; then
   fancy_echo "🍺 Installing Homebrew..."
   NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  eval "$($HOMEBREW_PREFIX/bin/brew shellenv)"
 fi
 
-# Ensure brew is on PATH for existing installations too
 eval "$($HOMEBREW_PREFIX/bin/brew shellenv)"
 
-# Install Xcode Command Line Tools
 if ! xcode-select -p &>/dev/null; then
   fancy_echo "Installing Xcode Command Line Tools..."
   xcode-select --install
-
-  # Wait for installation to complete
   until xcode-select -p &>/dev/null; do
     sleep 5
   done
 fi
 
-# Update Homebrew and install packages
 fancy_echo "🍻 Updating Homebrew formulae..."
 brew update
 brew bundle --file=./Brewfile
 
-# Configure fish shell
 fancy_echo "🐠 Setting up fish shell..."
 if ! grep -q "$HOMEBREW_PREFIX/bin/fish" /etc/shells; then
   echo "$HOMEBREW_PREFIX/bin/fish" | sudo tee -a /etc/shells
@@ -73,7 +60,6 @@ if [ "$SHELL" != "$HOMEBREW_PREFIX/bin/fish" ]; then
   chsh -s "$HOMEBREW_PREFIX/bin/fish"
 fi
 
-# Mise setup — install language runtimes
 fancy_echo "📦 Installing language runtimes via mise..."
 mise install
 
