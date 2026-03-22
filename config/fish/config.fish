@@ -1,4 +1,4 @@
-set -U fish_greeting
+set -g fish_greeting
 
 if not functions -q fisher
     set -q XDG_CONFIG_HOME; or set XDG_CONFIG_HOME ~/.config
@@ -20,5 +20,4 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 starship init fish | source
 mise activate fish | source
 
-set -gx PATH $HOME/go/bin $PATH
-set -gx PATH $HOME/.local/bin $PATH
+fish_add_path $HOME/.local/bin $HOME/go/bin

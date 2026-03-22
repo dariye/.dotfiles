@@ -3,6 +3,7 @@ _.file = "./.env"
 
 [tools]
 bun = "latest"
+go = "latest"
 java = "24"
 node = "latest"
 python = "3"
