@@ -1,0 +1,20 @@
+[core]
+	excludesFile = ~/.gitignore
+
+[init]
+	defaultBranch = main
+
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+
+[rebase]
+	autoStash = true
+
+[diff]
+	algorithm = histogram
+
+[merge]
+	conflictstyle = zdiff3

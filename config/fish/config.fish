@@ -7,8 +7,8 @@ if not functions -q fisher
 end
 
 if type -q hx
-    alias vim='hx'
-    alias vi='hx'
+    abbr -a vim hx
+    abbr -a vi hx
 end
 
 set -gx LC_ALL en_GB.UTF-8
@@ -19,3 +19,8 @@ fish_add_path $HOME/.local/bin $HOME/go/bin
 
 starship init fish | source
 mise activate fish | source
+
+# Shell integrations (lazy — only if command exists)
+if type -q atuin; atuin init fish | source; end
+if type -q mise; mise completions fish | source; end
+if type -q gh; gh completion -s fish | source; end

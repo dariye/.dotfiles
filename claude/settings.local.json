@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:innovationsfonden.dk)",
+      "Bash(bd list:*)",
+      "Bash(bd stats:*)",
+      "Bash(python3:*)",
+      "Bash(pip3 install:*)",
+      "Bash(bd show:*)"
+    ]
+  }
+}

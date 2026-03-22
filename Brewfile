@@ -1,4 +1,3 @@
-tap "homebrew/bundle"
 brew "atuin"
 brew "aws-sso-util"
 brew "awscli"
