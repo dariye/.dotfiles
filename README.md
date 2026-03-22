@@ -15,7 +15,7 @@ Laptop setup for my Apple Silicon Mac (M-series) running macOS Sonoma or later.
 ```bash
 # clone repository
 git clone git://github.com/dariye/.dotfiles.git ~/.dotfiles
-cd ~/dotfiles
+cd ~/.dotfiles
 
 # make setup script executable
 chmod +x mac-setup
@@ -49,8 +49,8 @@ Some of these are not installed using the setup script. I install them manually 
 <details>
     <summary>Editors</summary>
     <ul>
-        <li><a href="https://neovim.io">neovim</a></li>
-        <li><a href="https://zed.dev/">zed</a></li>
+        <li><a href="https://helix-editor.com/">Helix</a></li>
+        <li><a href="https://zed.dev/">Zed</a></li>
     </ul>
     <details>
         <summary>Theme</summary>
@@ -79,5 +79,13 @@ Some of these are not installed using the setup script. I install them manually 
     <summary>Productivity</summary>
     <ul>
         <li><a href="https://www.raycast.com">Raycast</a></li>
+        <li><a href="https://rectangleapp.com/">Rectangle</a></li>
+    </ul>
+</details>
+
+<details>
+    <summary>AI</summary>
+    <ul>
+        <li><a href="https://ollama.com/">Ollama</a></li>
     </ul>
 </details>
