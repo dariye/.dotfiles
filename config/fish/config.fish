@@ -1,36 +1,21 @@
-set -U fish_greeting
+set -g fish_greeting
 
 if not functions -q fisher
     set -q XDG_CONFIG_HOME; or set XDG_CONFIG_HOME ~/.config
-    curl https://git.io/fisher --create-dirs -sLo $XDG_CONFIG_HOME/fish/functions/fisher.fish
+    curl --max-time 10 https://raw.githubusercontent.com/jorgebucaran/fisher/4.4.8/functions/fisher.fish --create-dirs -sLo $XDG_CONFIG_HOME/fish/functions/fisher.fish
     fish -c fisher
 end
 
-if type nvim >/dev/null 2>/dev/null
-  alias vim='nvim'
-  alias vi='nvim'
+if type -q hx
+    alias vim='hx'
+    alias vi='hx'
 end
 
 set -gx LC_ALL en_GB.UTF-8
-set -gx LANG en_GB.UTF-8
 
-# load shell env
-eval "$(/opt/homebrew/bin/brew shellenv)"
+fish_add_path $HOME/.local/bin $HOME/go/bin
 
-# asdf -- https://asdf-vm.com/guide/getting-started.html
-if test -z $ASDF_DATA_DIR
-    set _asdf_shims "$HOME/.asdf/shims"
-else
-    set _asdf_shims "$ASDF_DATA_DIR/shims"
-end
-
-# Do not use fish_add_path (added in Fish 3.2) because it
-# potentially changes the order of items in PATH
-if not contains $_asdf_shims $PATH
-    set -gx --prepend PATH $_asdf_shims
-end
-set --erase _asdf_shims
-
-direnv hook fish | source
+/opt/homebrew/bin/brew shellenv | source
 
 starship init fish | source
+mise activate fish | source

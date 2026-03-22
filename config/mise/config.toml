@@ -1,0 +1,13 @@
+[env]
+_.file = "./.env"
+
+[tools]
+bun = "latest"
+go = "latest"
+java = "24"
+postgres = ["18", "16"]
+node = "latest"
+python = "3"
+ruby = "3"
+rust = "latest"
+uv = "latest"
