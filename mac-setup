@@ -40,7 +40,7 @@ if ! xcode-select -p &>/dev/null; then
 fi
 
 fancy_echo "🍻 Installing Homebrew packages..."
-brew bundle --file=./Brewfile
+brew bundle --file=./Brewfile --no-upgrade
 
 fancy_echo "🐠 Setting up fish shell..."
 if ! grep -q "$HOMEBREW_PREFIX/bin/fish" /etc/shells; then
