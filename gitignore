@@ -16,3 +16,24 @@ log/*.log
 rerun.txt
 tags
 tmp/**/*
+
+# Claude Code runtime data (not config)
+claude/cache/
+claude/sessions/
+claude/projects/
+claude/plugins/
+claude/tasks/
+claude/plans/
+claude/backups/
+claude/debug/
+claude/shell-snapshots/
+claude/telemetry/
+claude/todos/
+claude/session-env/
+claude/file-history/
+claude/paste-cache/
+claude/downloads/
+claude/chrome/
+claude/statsig/
+claude/history.jsonl
+claude/stats-cache.json
