@@ -2,12 +2,12 @@
 
 ![Screenshot](/screenshot.png?raw=true "Screenshot")
 
-Laptop setup for my Apple Silicon Mac (M1) running macOS Sonoma or later.
+Laptop setup for my Apple Silicon Mac (M-series) running macOS Sonoma or later.
 
 ## Prerequisites
 
 - Apple Silicon Mac (M1 or later)
-- macOS Sonoma or later
+- macOS Sonoma (14.0) or later
 - Internet connection
 
 ### Getting started
@@ -64,7 +64,7 @@ Some of these are not installed using the setup script. I install them manually 
     <summary>Package managers</summary>
     <ul>
         <li><a href="https://homebrew.sh/">brew</a></li>
-        <li><a href="https://asdf-vm.com">asdf</a></li>
+        <li><a href="https://mise.jdx.dev">mise</a></li>
     </ul>
 </details>
 

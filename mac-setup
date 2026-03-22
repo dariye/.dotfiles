@@ -1,10 +1,9 @@
 #!/bin/bash
-# Optimized for M3 MacBook Pro
+# Optimized for Apple Silicon Mac (M-series)
 # Based on Thoughtbot's laptop script and original setup
 
 # Constants
 HOMEBREW_PREFIX="/opt/homebrew"
-ASDF_HOME="$HOME/.asdf"
 XDG_CONFIG_HOME="$HOME/.config"
 
 # Improved error handling
@@ -16,7 +15,7 @@ fancy_echo() {
   printf "\\n%b\\n" "$fmt"
 }
 
-# Verify M3/ARM architecture
+# Verify ARM architecture
 if [ "$(uname -m)" != "arm64" ]; then
   fancy_echo "⚠️  This script is optimized for Apple Silicon (M-series) Macs"
   exit 1
@@ -59,57 +58,6 @@ if ! xcode-select -p &>/dev/null; then
   done
 fi
 
-clean_asdf_installation() {
-  fancy_echo "🧹 Cleaning existing ASDF installation..."
-
-  # Remove existing ASDF directory if it exists
-  if [ -d "$ASDF_HOME" ]; then
-    rm -rf "$ASDF_HOME"
-  fi
-
-  # Ensure clean ASDF installation
-  brew uninstall asdf --force 2>/dev/null || true
-  brew install asdf
-
-  # Create fresh ASDF directory
-  mkdir -p "$ASDF_HOME"
-
-  # Source ASDF
-  # source "$(brew --prefix asdf)/libexec/asdf.sh"
-}
-
-# ASDF Plugin Management with cleanup
-add_or_install_asdf_plugin() {
-  local name="$1"
-  local url="$2"
-  local plugin_dir="$ASDF_HOME/plugins/$name"
-
-  # Clean existing plugin if present
-  if [ -d "$plugin_dir" ]; then
-    rm -rf "$plugin_dir"
-  fi
-
-  fancy_echo "🔌 Installing $name plugin..."
-  asdf plugin add "$name" "$url"
-}
-
-# Optimized language installation
-install_asdf_language() {
-  local language="$1"
-  local version
-
-  if [ "$2" = "latest" ]; then
-    version="$(asdf latest "$language")"
-  else
-    version="$2"
-  fi
-
-  if ! asdf list "$language" 2>/dev/null | grep -Fq "$version"; then
-    asdf install "$language" "$version"
-    asdf global "$language" "$version"
-  fi
-}
-
 # Update Homebrew and install packages
 fancy_echo "🍻 Updating Homebrew formulae..."
 brew update
@@ -122,23 +70,14 @@ if ! grep -q "$HOMEBREW_PREFIX/bin/fish" /etc/shells; then
 fi
 chsh -s "$HOMEBREW_PREFIX/bin/fish"
 
-# ASDF setup
-fancy_echo "Setting up asdf package manager..."
+# Mise setup — install language runtimes
+fancy_echo "📦 Installing language runtimes via mise..."
+eval "$(mise activate bash)"
+mise install
 
-# Clean and reinstall ASDF
-clean_asdf_installation
-# Install language versions
-add_or_install_asdf_plugin "ruby" "https://github.com/asdf-vm/asdf-ruby.git"
-add_or_install_asdf_plugin "nodejs" "https://github.com/asdf-vm/asdf-nodejs.git"
-add_or_install_asdf_plugin "python" "https://github.com/danhper/asdf-python.git"
-add_or_install_asdf_plugin "rust" "https://github.com/code-lever/asdf-rust.git"
-add_or_install_asdf_plugin "pnpm" "https://github.com/jonathanmorley/asdf-pnpm.git"
-
-# Install latest versions of languages
-install_asdf_language "ruby" "latest"
-install_asdf_language "nodejs" "latest"
-install_asdf_language "python" "3.11.7"
-install_asdf_language "rust" "latest"
-install_asdf_language "pnpm" "latest"
+# Gas Town (gt) — not available via Homebrew
+fancy_echo "⛽ Installing Gas Town..."
+go install github.com/steveyegge/gastown/cmd/gt@latest
+gt install --shell
 
 fancy_echo "✅ Setup complete!"
