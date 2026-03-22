@@ -24,15 +24,6 @@ fi
 
 mkdir -p "$XDG_CONFIG_HOME"
 
-if [ -d "$HOMEBREW_PREFIX" ]; then
-  if ! [ -r "$HOMEBREW_PREFIX" ]; then
-    sudo chown -R "$USER:admin" "$HOMEBREW_PREFIX"
-  fi
-else
-  sudo mkdir -p "$HOMEBREW_PREFIX"
-  sudo chown -R "$USER:admin" "$HOMEBREW_PREFIX"
-fi
-
 if ! command -v brew >/dev/null; then
   fancy_echo "🍺 Installing Homebrew..."
   NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -48,8 +39,7 @@ if ! xcode-select -p &>/dev/null; then
   done
 fi
 
-fancy_echo "🍻 Updating Homebrew formulae..."
-brew update
+fancy_echo "🍻 Installing Homebrew packages..."
 brew bundle --file=./Brewfile
 
 fancy_echo "🐠 Setting up fish shell..."
@@ -63,10 +53,9 @@ fi
 fancy_echo "📦 Installing language runtimes via mise..."
 mise install
 
-# Gas Town (gt) — not available via Homebrew, requires Go from mise
+# Gas Town (gt) — not available via Homebrew
 fancy_echo "⛽ Installing Gas Town..."
-eval "$(mise activate bash)"
-go install github.com/steveyegge/gastown/cmd/gt@latest
+mise exec go -- go install github.com/steveyegge/gastown/cmd/gt@latest
 export PATH="$HOME/go/bin:$PATH"
 gt install --shell
 
