@@ -10,74 +10,44 @@ Laptop setup for my Apple Silicon Mac (M-series) running macOS Sonoma or later.
 - macOS Sonoma (14.0) or later
 - Internet connection
 
-### Getting started
+## Getting started
 
 ```bash
-# clone repository
+# 1. Clone
 git clone git://github.com/dariye/.dotfiles.git ~/.dotfiles
-cd ~/dotfiles
+cd ~/.dotfiles
 
-# make setup script executable
+# 2. Run system setup (installs Homebrew, packages, runtimes)
 chmod +x mac-setup
-
-# run setup script
 ./mac-setup
 
-# Setup dotfiles (after mac-setup completes)
+# 3. Symlink dotfiles into place
 env RCRC=$HOME/.dotfiles/rcrc rcup
-source ~/.config/fish/config.fish
+
+# 4. Reload shell
+exec fish
 ```
 
+### What happens
 
-## My programs
-Some of these are not installed using the setup script. I install them manually (for now).
+1. **`mac-setup`** installs Homebrew, runs `brew bundle` (Brewfile), sets fish as default shell, installs language runtimes via mise, and installs Gas Town.
+2. **`rcup`** symlinks config files into `$HOME` (fish config, starship, mise, gitignore, Claude Code settings, etc.). See `rcrc` for exclusions.
+3. **Fish shell** auto-bootstraps Fisher on first launch and installs plugins from `fish_plugins`.
 
-<details>
-    <summary>Terminal</summary>
-    <ul>
-        <li><a href="https://ghostty.org/">Ghostty</a> with <a href="https://www.nordtheme.com/">Nord theme</a>.</li>
-    </ul>
-    <details>
-        <summary>Shell</summary>
-        <ul>
-            <li><a href="https://fishshell.com/">Fish</a> with <a href="https://github.com/jorgebucaran/fisher">fisher pkg manager</a>.</li>
-            <li><a href="https://starship.rs">Starship</a> with <a href="https://starship.rs/presets/pure-preset">Pure Preset</a>.</li>
-        </ul>
-    </details>
-</details>
+### Re-running
 
-<details>
-    <summary>Editors</summary>
-    <ul>
-        <li><a href="https://neovim.io">neovim</a></li>
-        <li><a href="https://zed.dev/">zed</a></li>
-    </ul>
-    <details>
-        <summary>Theme</summary>
-        <ul>
-            <li><a href="https://www.nordtheme.com/">nord</a></li>
-        </ul>
-    </details>
-</details>
+`mac-setup` is idempotent. `brew bundle --no-upgrade` only installs missing packages. `rcup` can be re-run safely to pick up new dotfiles.
 
-<details>
-    <summary>Package managers</summary>
-    <ul>
-        <li><a href="https://homebrew.sh/">brew</a></li>
-        <li><a href="https://mise.jdx.dev">mise</a></li>
-    </ul>
-</details>
+## What's included
 
-<details>
-    <summary>Dotfile manager</summary>
-    <ul>
-        <li><a href="http://thoughtbot.github.io/rcm/rcm.7.html)">rcm</a></li>
-    </ul>
-</details>
-
-<details>
-    <summary>Productivity</summary>
-    <ul>
-        <li><a href="https://www.raycast.com">Raycast</a></li>
-    </ul>
-</details>
+| Category | Tools |
+|----------|-------|
+| Shell | [Fish](https://fishshell.com/) + [Fisher](https://github.com/jorgebucaran/fisher) + [Starship](https://starship.rs) (Pure preset) |
+| Terminal | [Ghostty](https://ghostty.org/) with Nord theme |
+| Editors | [Helix](https://helix-editor.com/) (aliased as vim/vi), [Zed](https://zed.dev/) |
+| Runtimes | Ruby, Node, Python, Go, Rust, Bun, Java (via [mise](https://mise.jdx.dev)) |
+| Databases | PostgreSQL 16 + 18 (via mise), [Dolt](https://www.dolthub.com/) |
+| AI/Dev | [Claude Code](https://claude.ai/), [Beads](https://beads.dev/) (issue tracking), [Ollama](https://ollama.ai/) |
+| Infra | Docker, AWS CLI, Temporal, Kubernetes (minikube/kubectx), Flux |
+| Packages | [Homebrew](https://brew.sh/), [mise](https://mise.jdx.dev), [rcm](http://thoughtbot.github.io/rcm/rcm.7.html) (dotfile manager) |
+| Productivity | [Raycast](https://www.raycast.com), [Rectangle](https://rectangleapp.com/), [Atuin](https://atuin.sh/) (shell history) |

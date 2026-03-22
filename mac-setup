@@ -51,12 +51,15 @@ if [ "$SHELL" != "$HOMEBREW_PREFIX/bin/fish" ]; then
 fi
 
 fancy_echo "📦 Installing language runtimes via mise..."
-mise install
+mise install --yes
 
 # Gas Town (gt) — not available via Homebrew
 fancy_echo "⛽ Installing Gas Town..."
-mise exec go -- go install github.com/steveyegge/gastown/cmd/gt@latest
-export PATH="$HOME/go/bin:$PATH"
-gt install --shell
+if mise exec go -- go install github.com/steveyegge/gastown/cmd/gt@latest; then
+  export PATH="$HOME/go/bin:$PATH"
+  gt install --shell
+else
+  fancy_echo "⚠️  Gas Town installation failed (non-fatal, skipping)"
+fi
 
 fancy_echo "✅ Setup complete!"
