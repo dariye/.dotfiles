@@ -51,7 +51,7 @@ if [ "$SHELL" != "$HOMEBREW_PREFIX/bin/fish" ]; then
 fi
 
 fancy_echo "📦 Installing language runtimes via mise..."
-mise install --yes
+MISE_CONFIG_FILE="$PWD/config/mise/config.toml" mise install --yes
 
 # Gas Town (gt) — not available via Homebrew
 fancy_echo "⛽ Installing Gas Town..."
