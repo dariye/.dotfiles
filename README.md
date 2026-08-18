@@ -14,19 +14,25 @@ Laptop setup for my Apple Silicon Mac (M-series) running macOS Sonoma or later.
 
 ```bash
 # clone repository
-git clone git://github.com/dariye/.dotfiles.git ~/.dotfiles
+git clone git@github.com:dariye/.dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
+
+# git identity is required before Gas Town can initialise beads
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
 
 # make setup script executable
 chmod +x mac-setup
 
-# run setup script
+# run setup script (links dotfiles via rcm, then installs runtimes)
 ./mac-setup
 
-# Setup dotfiles (after mac-setup completes)
-env RCRC=$HOME/.dotfiles/rcrc rcup
 source ~/.config/fish/config.fish
 ```
+
+`mac-setup` runs `rcup` itself, before `mise install` — the mise config has to be
+linked into `~/.config` before mise can read it. Set `GT_HQ` to put the Gas Town
+HQ somewhere other than `~/gt`.
 
 
 ## My programs
