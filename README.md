@@ -36,7 +36,7 @@ HQ somewhere other than `~/gt`.
 
 
 ## My programs
-Some of these are not installed using the setup script. I install them manually (for now).
+All of these are installed by `mac-setup`, via the Brewfile unless noted.
 
 <details>
     <summary>Terminal</summary>
@@ -77,7 +77,7 @@ Some of these are not installed using the setup script. I install them manually 
 <details>
     <summary>Dotfile manager</summary>
     <ul>
-        <li><a href="http://thoughtbot.github.io/rcm/rcm.7.html)">rcm</a></li>
+        <li><a href="http://thoughtbot.github.io/rcm/rcm.7.html">rcm</a></li>
     </ul>
 </details>
 
@@ -93,5 +93,6 @@ Some of these are not installed using the setup script. I install them manually 
     <summary>AI</summary>
     <ul>
         <li><a href="https://ollama.com/">Ollama</a></li>
+        <li><a href="https://github.com/steveyegge/gastown">Gas Town</a> — built from source by <code>mac-setup</code> (not on Homebrew). HQ at <code>~/gt</code>, override with <code>GT_HQ</code>. Shell integration for fish lives in <code>config/fish/conf.d/gastown.fish</code>, since upstream only ships bash and zsh.</li>
     </ul>
 </details>
