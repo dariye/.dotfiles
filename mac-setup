@@ -90,6 +90,7 @@ if ! dolt config --list 2>/dev/null | grep -q "^user.name"; then
 fi
 # Per repo, kept invisible to collaborators via .git/info/exclude:
 #   bd init --stealth && bd setup claude --stealth
+#   bd setup cursor --stealth        # repos where Cursor is used
 #   bd dolt remote add origin file://$HOME/workspace/.beads-remotes/<name>
 # (bd setup --stealth does not exclude CLAUDE.md/.claude — add those to
 # .git/info/exclude manually in repos with upstreams.)
@@ -124,5 +125,8 @@ if ! brew services list | grep -Eq "^syncthing\s+started"; then
   brew services start syncthing
 fi
 fancy_echo "   Pair devices at http://127.0.0.1:8384 and share the workspace-moi folder (path: ~/workspace) to receive .moi-objects and .beads-remotes."
+
+# Hermes Agent is opt-in, not installed here: run ./hermes-setup when
+# adopting it (trial posture — see 'The agent's brain' in the README).
 
 fancy_echo "✅ Setup complete!"
