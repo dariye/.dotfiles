@@ -14,23 +14,29 @@ Laptop setup for my Apple Silicon Mac (M-series) running macOS Sonoma or later.
 
 ```bash
 # clone repository
-git clone git://github.com/dariye/.dotfiles.git ~/.dotfiles
+git clone git@github.com:dariye/.dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
+
+# git identity is required before Gas Town can initialise beads
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
 
 # make setup script executable
 chmod +x mac-setup
 
-# run setup script
+# run setup script (links dotfiles via rcm, then installs runtimes)
 ./mac-setup
 
-# Setup dotfiles (after mac-setup completes)
-env RCRC=$HOME/.dotfiles/rcrc rcup
 source ~/.config/fish/config.fish
 ```
 
+`mac-setup` runs `rcup` itself, before `mise install` — the mise config has to be
+linked into `~/.config` before mise can read it. Set `GT_HQ` to put the Gas Town
+HQ somewhere other than `~/gt`.
+
 
 ## My programs
-Some of these are not installed using the setup script. I install them manually (for now).
+All of these are installed by `mac-setup`, via the Brewfile unless noted.
 
 <details>
     <summary>Terminal</summary>
@@ -71,7 +77,7 @@ Some of these are not installed using the setup script. I install them manually 
 <details>
     <summary>Dotfile manager</summary>
     <ul>
-        <li><a href="http://thoughtbot.github.io/rcm/rcm.7.html)">rcm</a></li>
+        <li><a href="http://thoughtbot.github.io/rcm/rcm.7.html">rcm</a></li>
     </ul>
 </details>
 
@@ -87,5 +93,6 @@ Some of these are not installed using the setup script. I install them manually 
     <summary>AI</summary>
     <ul>
         <li><a href="https://ollama.com/">Ollama</a></li>
+        <li><a href="https://github.com/steveyegge/gastown">Gas Town</a> — built from source by <code>mac-setup</code> (not on Homebrew). HQ at <code>~/gt</code>, override with <code>GT_HQ</code>. Shell integration for fish lives in <code>config/fish/conf.d/gastown.fish</code>, since upstream only ships bash and zsh.</li>
     </ul>
 </details>
