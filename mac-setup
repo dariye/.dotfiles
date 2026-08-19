@@ -70,8 +70,19 @@ fancy_echo "🖥  Installing moi..."
 mise exec bun -- bun i -g moi-computer@latest
 "$HOME/.bun/bin/moi" service install
 
-# beads (bd) comes from the Brewfile — the memory layer for coding agents.
-# Per-repo databases are created on demand with `bd`; nothing global to set up.
+# beads (bd) + Dolt — the memory layer for coding agents. bd embeds its own
+# Dolt engine; the Brewfile's dolt CLI is for inspecting and backing up the
+# databases. Dolt commits need an identity (falls back to git config, set
+# explicitly here so it survives git config changes).
+fancy_echo "📿 Configuring Dolt identity for beads..."
+if ! dolt config --list 2>/dev/null | grep -q "^user.name"; then
+  dolt config --global --add user.name "$(git config --global user.name)"
+  dolt config --global --add user.email "$(git config --global user.email)"
+fi
+# Per repo, kept invisible to collaborators via .git/info/exclude:
+#   bd init --stealth && bd setup claude --stealth
+# (bd setup --stealth does not exclude CLAUDE.md/.claude — add those to
+# .git/info/exclude manually in repos with upstreams.)
 
 # Syncthing — p2p sync for the ~/workspace MOI layer, GUI on 127.0.0.1:8384.
 # The .stignore allowlist (kept in the workspace repo) syncs only .moi-objects
