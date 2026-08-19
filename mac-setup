@@ -46,7 +46,10 @@ fancy_echo "🐠 Setting up fish shell..."
 if ! grep -q "$HOMEBREW_PREFIX/bin/fish" /etc/shells; then
   echo "$HOMEBREW_PREFIX/bin/fish" | sudo tee -a /etc/shells
 fi
-if [ "$SHELL" != "$HOMEBREW_PREFIX/bin/fish" ]; then
+# Check the account's login shell, not $SHELL — the script may run from any
+# shell context (agents, CI) where $SHELL doesn't reflect the account record.
+LOGIN_SHELL="$(dscl . -read "/Users/$USER" UserShell | awk '{print $2}')"
+if [ "$LOGIN_SHELL" != "$HOMEBREW_PREFIX/bin/fish" ]; then
   chsh -s "$HOMEBREW_PREFIX/bin/fish"
 fi
 
@@ -67,8 +70,14 @@ mise install
 # it on login and keeps it running, bound to localhost only. Per-project setup
 # stays manual: `moi init` inside each repo under ~/workspace.
 fancy_echo "🖥  Installing moi..."
-mise exec bun -- bun i -g moi-computer@latest
-"$HOME/.bun/bin/moi" service install
+# The running server must go down before (re)installing — so only install
+# when absent; updates are manual (`moi update --check`).
+if [ ! -x "$HOME/.bun/bin/moi" ]; then
+  mise exec bun -- bun i -g moi-computer@latest
+  "$HOME/.bun/bin/moi" service install
+else
+  fancy_echo "   moi already installed ($("$HOME/.bun/bin/moi" --version))"
+fi
 
 # beads (bd) + Dolt — the memory layer for coding agents. bd embeds its own
 # Dolt engine; the Brewfile's dolt CLI is for inspecting and backing up the
@@ -89,10 +98,31 @@ fi
 # Telemetry is disabled in config/bd/config.yaml (rcup links it to
 # ~/.config/bd/config.yaml).
 
+# ~/workspace — the root every project repo lives under (each its own git
+# repo + moi workspace; see the workspace README). Seed files come from
+# templates/workspace; the metadata repo is local-only per machine, and the
+# actual MOI/beads state arrives via Syncthing pairing.
+fancy_echo "🗂  Bootstrapping ~/workspace..."
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+mkdir -p "$HOME/workspace"
+for f in README.md .gitignore .stignore; do
+  if [ ! -f "$HOME/workspace/$f" ]; then
+    cp "$SCRIPT_DIR/templates/workspace/$f" "$HOME/workspace/$f"
+  fi
+done
+if [ ! -d "$HOME/workspace/.git" ]; then
+  git -C "$HOME/workspace" init -q
+  git -C "$HOME/workspace" add -A
+  git -C "$HOME/workspace" commit -qm "Bootstrap workspace metadata"
+fi
+
 # Syncthing — p2p sync for the ~/workspace MOI layer, GUI on 127.0.0.1:8384.
 # The .stignore allowlist (kept in the workspace repo) syncs only .moi-objects
 # and workspace metadata — never code repos, which sync via their own remotes.
 fancy_echo "🔄 Starting Syncthing..."
-brew services start syncthing
+if ! brew services list | grep -Eq "^syncthing\s+started"; then
+  brew services start syncthing
+fi
+fancy_echo "   Pair devices at http://127.0.0.1:8384 and share the workspace-moi folder (path: ~/workspace) to receive .moi-objects and .beads-remotes."
 
 fancy_echo "✅ Setup complete!"
