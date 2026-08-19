@@ -92,8 +92,9 @@ fi
 #   bd init --stealth && bd setup claude --stealth
 #   bd setup cursor --stealth        # repos where Cursor is used
 #   bd dolt remote add origin file://$HOME/workspace/.beads-remotes/<name>
-# (bd setup --stealth does not exclude CLAUDE.md/.claude — add those to
-# .git/info/exclude manually in repos with upstreams.)
+# (bd setup --stealth does not exclude the editor files it writes —
+# CLAUDE.md, .claude/, .cursor/ — add those to .git/info/exclude manually
+# in repos with upstreams.)
 # Memory syncs with `bd dolt push/pull` against those file:// remotes, which
 # Syncthing carries between machines — NEVER against work git remotes.
 # Telemetry is disabled in config/bd/config.yaml (rcup links it to
@@ -126,7 +127,19 @@ if ! brew services list | grep -Eq "^syncthing\s+started"; then
 fi
 fancy_echo "   Pair devices at http://127.0.0.1:8384 and share the workspace-moi folder (path: ~/workspace) to receive .moi-objects and .beads-remotes."
 
-# Hermes Agent is opt-in, not installed here: run ./hermes-setup when
-# adopting it (trial posture — see 'The agent's brain' in the README).
+# Hermes Agent — provider-agnostic coding harness (and a moi harness:
+# `moi init --harness=hermes`). Not on Homebrew; the installer is fetched
+# to a file rather than piped straight from curl. House rules: no messaging
+# gateways on a work machine; ~/.hermes is Hermes' own scratch — beads
+# stays the canonical memory (see 'The agent's brain' in the README).
+fancy_echo "🪽 Installing Hermes Agent..."
+if ! command -v hermes >/dev/null 2>&1; then
+  HERMES_INSTALLER="$(mktemp -d)/hermes-install.sh"
+  curl -fsSL https://hermes-agent.nousresearch.com/install.sh -o "$HERMES_INSTALLER"
+  bash "$HERMES_INSTALLER"
+  fancy_echo "   Run \`hermes setup\` to pick a provider/model (needs ≥64K context)."
+else
+  fancy_echo "   Hermes already installed"
+fi
 
 fancy_echo "✅ Setup complete!"

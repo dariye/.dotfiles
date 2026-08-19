@@ -40,9 +40,9 @@ MOI widgets and beads memory arrive once you pair Syncthing and share the
 
 ## The agent's brain
 
-How project knowledge is organized across the AI tools, so every store has one
-charter and agents know where to read and write. Inspired by Steve Yegge's
-[The Shape of Things to Come](https://yegge.ai/essays/the-shape-of-things-to-come/).
+A setup for making the most out of agents: every store of project knowledge
+has exactly one charter, so agents always know where to read and where to
+write.
 
 | Store | Charter | Lifetime | How it reaches a session |
 |---|---|---|---|
@@ -123,6 +123,6 @@ All of these are installed by `mac-setup`, via the Brewfile unless noted.
         <li><a href="https://moi.computer/">moi</a> — local agent workspace UI, installed globally with bun by <code>mac-setup</code> (not on Homebrew). Runs as a launchd service on <code>localhost:13337</code>; run <code>moi init</code> inside each project repo. <code>config/fish/conf.d/bun.fish</code> puts <code>~/.bun/bin</code> on PATH for it.</li>
         <li>Claude Code — global settings travel as <code>claude/settings.json</code> (rcup links it to <code>~/.claude/settings.json</code>); machine-local state (sessions, history) stays out. Global <code>CLAUDE.md</code>, skills, and agents follow the same pattern as they appear.</li>
         <li><a href="https://cursor.com/">Cursor</a> — via the Brewfile cask. Shares each repo's beads memory: <code>bd setup cursor --stealth</code> alongside the claude recipe. Not a moi harness.</li>
-        <li><a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a> — <strong>opt-in, on trial</strong>: <code>./hermes-setup</code> (downloads the installer for review first, then prints the house rules: no messaging gateways on a work machine, <code>~/.hermes</code> is scratch — beads stays the canonical memory, <code>moi init --harness=hermes</code> where it drives a workspace).</li>
+        <li><a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a> — installed by <code>mac-setup</code> (not on Homebrew). Provider-agnostic and a moi harness (<code>moi init --harness=hermes</code>). House rules: run <code>hermes setup</code> to pick a provider/model; no messaging gateways on a work machine; <code>~/.hermes</code> is scratch — beads stays the canonical memory.</li>
     </ul>
 </details>
