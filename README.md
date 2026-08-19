@@ -13,11 +13,12 @@ Laptop setup for my Apple Silicon Mac (M-series) running macOS Sonoma or later.
 ### Getting started
 
 ```bash
-# clone repository
-git clone git@github.com:dariye/.dotfiles.git ~/.dotfiles
-cd ~/.dotfiles
+# clone repository — this repo lives inside ~/workspace, the root that holds
+# every project repo (each its own git repo + moi workspace)
+git clone git@github.com:dariye/.dotfiles.git ~/workspace/dotfiles
+cd ~/workspace/dotfiles
 
-# git identity is required before Gas Town can initialise beads
+# set your git identity
 git config --global user.name "Your Name"
 git config --global user.email "you@example.com"
 
@@ -31,8 +32,7 @@ source ~/.config/fish/config.fish
 ```
 
 `mac-setup` runs `rcup` itself, before `mise install` — the mise config has to be
-linked into `~/.config` before mise can read it. Set `GT_HQ` to put the Gas Town
-HQ somewhere other than `~/gt`.
+linked into `~/.config` before mise can read it.
 
 
 ## My programs
@@ -93,6 +93,7 @@ All of these are installed by `mac-setup`, via the Brewfile unless noted.
     <summary>AI</summary>
     <ul>
         <li><a href="https://ollama.com/">Ollama</a></li>
-        <li><a href="https://github.com/steveyegge/gastown">Gas Town</a> — built from source by <code>mac-setup</code> (not on Homebrew). HQ at <code>~/gt</code>, override with <code>GT_HQ</code>. Shell integration for fish lives in <code>config/fish/conf.d/gastown.fish</code>, since upstream only ships bash and zsh.</li>
+        <li><a href="https://github.com/gastownhall/beads">beads</a> — the memory layer for coding agents (<code>bd</code>). Per-repo databases, nothing global to configure.</li>
+        <li><a href="https://moi.computer/">moi</a> — local agent workspace UI, installed globally with bun by <code>mac-setup</code> (not on Homebrew). Runs as a launchd service on <code>localhost:13337</code>; run <code>moi init</code> inside each project repo. <code>config/fish/conf.d/bun.fish</code> puts <code>~/.bun/bin</code> on PATH for it.</li>
     </ul>
 </details>

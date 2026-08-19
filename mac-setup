@@ -51,7 +51,7 @@ if [ "$SHELL" != "$HOMEBREW_PREFIX/bin/fish" ]; then
 fi
 
 fancy_echo "🔗 Linking dotfiles..."
-env RCRC="$HOME/.dotfiles/rcrc" rcup -f
+env RCRC="$HOME/workspace/dotfiles/rcrc" rcup -f
 
 fancy_echo "📦 Installing language runtimes via mise..."
 # postgres is built from source and needs pkg-config plus keg-only icu4c.
@@ -62,31 +62,15 @@ fi
 mise trust "$XDG_CONFIG_HOME/mise/config.toml"
 mise install
 
-# Gas Town (gt) — not available via Homebrew. `go install` yields a binary that
-# refuses to run ("built with 'go build' directly"); only the Makefile sets the
-# BuiltProperly ldflag, and `make install` targets ~/.local/bin.
-fancy_echo "⛽ Installing Gas Town..."
-GASTOWN_SRC="$(mktemp -d)/gastown"
-git clone --depth 1 https://github.com/steveyegge/gastown.git "$GASTOWN_SRC"
-mise exec go -- make -C "$GASTOWN_SRC" install
-rm -rf "$GASTOWN_SRC"
+# moi (moi.computer) — local agent workspace UI, one server for all workspaces.
+# Installed globally with bun (which mise provides); the launchd service starts
+# it on login and keeps it running, bound to localhost only. Per-project setup
+# stays manual: `moi init` inside each repo under ~/workspace.
+fancy_echo "🖥  Installing moi..."
+mise exec bun -- bun i -g moi-computer@latest
+"$HOME/.bun/bin/moi" service install
 
-# gt initialises a beads (dolt) DB and needs an identity, which it reads from
-# git config if dolt has none of its own.
-if ! git config --global user.name >/dev/null 2>&1; then
-  fancy_echo "⚠️  Set your git identity before Gas Town can initialise beads:"
-  fancy_echo "    git config --global user.name \"Your Name\""
-  fancy_echo "    git config --global user.email \"you@example.com\""
-  exit 1
-fi
-
-# Pass the HQ path explicitly: with no argument gt uses the CURRENT directory,
-# which would make ~/.dotfiles itself the town root.
-GT_HQ="${GT_HQ:-$HOME/gt}"
-if [ ! -d "$GT_HQ/mayor" ]; then
-  "$HOME/.local/bin/gt" install "$GT_HQ" --shell
-else
-  fancy_echo "   Gas Town HQ already present at $GT_HQ"
-fi
+# beads (bd) comes from the Brewfile — the memory layer for coding agents.
+# Per-repo databases are created on demand with `bd`; nothing global to set up.
 
 fancy_echo "✅ Setup complete!"
