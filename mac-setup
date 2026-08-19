@@ -46,7 +46,10 @@ fancy_echo "🐠 Setting up fish shell..."
 if ! grep -q "$HOMEBREW_PREFIX/bin/fish" /etc/shells; then
   echo "$HOMEBREW_PREFIX/bin/fish" | sudo tee -a /etc/shells
 fi
-if [ "$SHELL" != "$HOMEBREW_PREFIX/bin/fish" ]; then
+# Check the account's login shell, not $SHELL — the script may run from any
+# shell context (agents, CI) where $SHELL doesn't reflect the account record.
+LOGIN_SHELL="$(dscl . -read "/Users/$USER" UserShell | awk '{print $2}')"
+if [ "$LOGIN_SHELL" != "$HOMEBREW_PREFIX/bin/fish" ]; then
   chsh -s "$HOMEBREW_PREFIX/bin/fish"
 fi
 
