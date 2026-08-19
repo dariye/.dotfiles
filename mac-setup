@@ -73,4 +73,10 @@ mise exec bun -- bun i -g moi-computer@latest
 # beads (bd) comes from the Brewfile — the memory layer for coding agents.
 # Per-repo databases are created on demand with `bd`; nothing global to set up.
 
+# Syncthing — p2p sync for the ~/workspace MOI layer, GUI on 127.0.0.1:8384.
+# The .stignore allowlist (kept in the workspace repo) syncs only .moi-objects
+# and workspace metadata — never code repos, which sync via their own remotes.
+fancy_echo "🔄 Starting Syncthing..."
+brew services start syncthing
+
 fancy_echo "✅ Setup complete!"
