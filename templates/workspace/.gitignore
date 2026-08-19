@@ -1,0 +1,17 @@
+# This repo tracks workspace/MOI metadata only — never child repo code.
+# Ignore everything at the root by default so any repo dropped in here
+# is excluded automatically...
+/*
+
+# ...except workspace metadata
+!/.gitignore
+!/README.md
+!/.stignore
+
+# MOI objects (real .moi dirs live here; child repos symlink to them)
+!/.moi-objects/
+
+# Never track secrets even inside whitelisted paths
+.env
+.env.*
+*.local

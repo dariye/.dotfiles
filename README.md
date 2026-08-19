@@ -32,7 +32,10 @@ source ~/.config/fish/config.fish
 ```
 
 `mac-setup` runs `rcup` itself, before `mise install` — the mise config has to be
-linked into `~/.config` before mise can read it.
+linked into `~/.config` before mise can read it. It also bootstraps `~/workspace`
+(seed files from `templates/workspace/`, local metadata git repo) — the actual
+MOI widgets and beads memory arrive once you pair Syncthing and share the
+`workspace-moi` folder.
 
 
 ## My programs
@@ -48,6 +51,8 @@ All of these are installed by `mac-setup`, via the Brewfile unless noted.
         <ul>
             <li><a href="https://fishshell.com/">Fish</a> with <a href="https://github.com/jorgebucaran/fisher">fisher pkg manager</a>.</li>
             <li><a href="https://starship.rs">Starship</a> with <a href="https://starship.rs/presets/pure-preset">Pure Preset</a>.</li>
+            <li><a href="https://github.com/ajeetdsouza/zoxide">zoxide</a> — smarter cd (<code>z</code>/<code>zi</code>).</li>
+            <li><a href="https://github.com/jesseduffield/lazygit">lazygit</a> — git TUI.</li>
         </ul>
     </details>
 </details>
@@ -95,5 +100,6 @@ All of these are installed by `mac-setup`, via the Brewfile unless noted.
         <li><a href="https://ollama.com/">Ollama</a></li>
         <li><a href="https://github.com/gastownhall/beads">beads</a> — the memory layer for coding agents (<code>bd</code>), backed by an embedded <a href="https://www.dolthub.com/">Dolt</a> engine (the Brewfile's <code>dolt</code> CLI inspects and backs up the databases; <code>mac-setup</code> sets its commit identity). Per-repo: <code>bd init --stealth</code> + <code>bd setup claude --stealth</code> keep everything out of git via <code>.git/info/exclude</code>, so collaborators never see it. Cross-machine sync via <code>bd dolt push/pull</code> against <code>file://</code> Dolt remotes under <code>~/workspace/.beads-remotes/</code> (carried by Syncthing) — never against work git remotes. Telemetry is disabled globally via <code>config/bd/config.yaml</code>.</li>
         <li><a href="https://moi.computer/">moi</a> — local agent workspace UI, installed globally with bun by <code>mac-setup</code> (not on Homebrew). Runs as a launchd service on <code>localhost:13337</code>; run <code>moi init</code> inside each project repo. <code>config/fish/conf.d/bun.fish</code> puts <code>~/.bun/bin</code> on PATH for it.</li>
+        <li>Claude Code — global settings travel as <code>claude/settings.json</code> (rcup links it to <code>~/.claude/settings.json</code>); machine-local state (sessions, history) stays out. Global <code>CLAUDE.md</code>, skills, and agents follow the same pattern as they appear.</li>
     </ul>
 </details>
