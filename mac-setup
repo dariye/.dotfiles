@@ -81,8 +81,13 @@ if ! dolt config --list 2>/dev/null | grep -q "^user.name"; then
 fi
 # Per repo, kept invisible to collaborators via .git/info/exclude:
 #   bd init --stealth && bd setup claude --stealth
+#   bd dolt remote add origin file://$HOME/workspace/.beads-remotes/<name>
 # (bd setup --stealth does not exclude CLAUDE.md/.claude — add those to
 # .git/info/exclude manually in repos with upstreams.)
+# Memory syncs with `bd dolt push/pull` against those file:// remotes, which
+# Syncthing carries between machines — NEVER against work git remotes.
+# Telemetry is disabled in config/bd/config.yaml (rcup links it to
+# ~/.config/bd/config.yaml).
 
 # Syncthing — p2p sync for the ~/workspace MOI layer, GUI on 127.0.0.1:8384.
 # The .stignore allowlist (kept in the workspace repo) syncs only .moi-objects
