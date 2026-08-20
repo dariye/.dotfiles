@@ -1,0 +1,23 @@
+---
+alwaysApply: true
+---
+
+# Knowledge Stores
+
+Every piece of project knowledge has exactly one canonical home. Five stores, five charters:
+
+| Store | Charter | How it reaches a session |
+|-------|---------|--------------------------|
+| Beads issues (`.beads/`) | Units of work; spec beads carry full implementation detail | Run `bd prime` at session start; issue detail loaded by the claimant |
+| `bd remember` | One-paragraph operational facts and gotchas | Injected into every session at prime time |
+| Brain (workspace `context/`, `outputs/`) | Strategy, decisions-and-why, playbooks, post-mortems | Pulled on demand |
+| Docs (per-repo `doc/`, `docs/`, README) | How system X works | Pulled by whoever works on X |
+| Skills (`~/.claude/skills/`, project skills) | Procedures for a recurring task type | Auto-loaded on task match |
+
+## Rules
+
+- **If the project has a `.beads/` directory, use bd for ALL task tracking.** No markdown TODO lists, no TodoWrite for multi-session work. `bd ready` to find work, `bd create` to file it, `bd close` when done. Run `bd prime` once at the start of the session to load workflow context and persistent memories.
+- **Durable gotchas go to `bd remember`, not markdown.** When you discover an operational fact that will bite again (a flaky path, a required flag, a hidden dependency), store it: `bd remember "fact" --key slug`. Do not create MEMORY.md files or append gotchas to AGENTS.md.
+- **Mint a skill when research repeats.** If a task required significant research or setup that a future task of the same type will need again, create a skill for it before ending the session (personal: `~/.claude/skills/<name>/SKILL.md`; project-scoped: the project's skills directory).
+- **If a git project has no beads yet** and the work involves multi-step or multi-session tracking, offer to onboard it with the `beads-onboard` skill.
+- **Beads owns operational state; markdown narrates.** Never duplicate issue status into markdown docs — link to the bead instead.
