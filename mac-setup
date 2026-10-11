@@ -12,6 +12,23 @@ fancy_echo() {
   printf "\\n%b\\n" "$1"
 }
 
+# --check: report what a run would do (missing brews, runtimes, links), no changes.
+if [ "${1:-}" = "--check" ]; then
+  eval "$($HOMEBREW_PREFIX/bin/brew shellenv 2>/dev/null || true)"
+  fancy_echo "🍻 Brewfile:";  brew bundle check --file=./Brewfile --verbose || true
+  fancy_echo "📦 mise:";      mise ls --missing 2>/dev/null || echo "   mise not installed"
+  fancy_echo "🔗 rcm links (target:source):"; env RCRC="$HOME/workspace/dotfiles/rcrc" lsrc 2>/dev/null || echo "   rcm not installed"
+  fancy_echo "🩺 doctor:";    "$(dirname "$0")/scripts/doctor" --quiet || true
+  exit 0
+fi
+
+# The steps below prompt (Xcode CLT dialog, sudo, chsh). Refuse to run them
+# unattended instead of hanging forever.
+if [ ! -t 0 ]; then
+  fancy_echo "⚠️  mac-setup needs an interactive terminal (it prompts for Xcode tools, sudo and chsh). Run it from a shell, or use --check."
+  exit 1
+fi
+
 if [ "$(uname -m)" != "arm64" ]; then
   fancy_echo "⚠️  This script is optimized for Apple Silicon (M-series) Macs"
   exit 1
@@ -56,6 +73,17 @@ fi
 fancy_echo "🔗 Linking dotfiles..."
 env RCRC="$HOME/workspace/dotfiles/rcrc" rcup -f
 
+# Claude Code settings are SEEDED, not linked: the live ~/.claude/settings.json
+# grows machine-local, employer-specific config that must never come back
+# into this public repo, so rcup must not be able to overwrite it either.
+if [ ! -f "$HOME/.claude/settings.json" ]; then
+  mkdir -p "$HOME/.claude"
+  cp "$HOME/workspace/dotfiles/claude/settings.json" "$HOME/.claude/settings.json"
+fi
+
+# Leak guard for this repo: pre-commit runs scripts/leak-check on staged files.
+git -C "$HOME/workspace/dotfiles" config core.hooksPath .githooks
+
 fancy_echo "📦 Installing language runtimes via mise..."
 # postgres is built from source and needs pkg-config plus keg-only icu4c.
 ICU_PREFIX="$(brew --prefix icu4c 2>/dev/null || true)"
@@ -63,12 +91,18 @@ if [ -n "$ICU_PREFIX" ]; then
   export PKG_CONFIG_PATH="$ICU_PREFIX/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
 fi
 mise trust "$XDG_CONFIG_HOME/mise/config.toml"
-mise install
+# GitHub's unauthenticated API limit bites on a fresh machine; mise treats a
+# 403 as permanent, so retry. Set GITHUB_TOKEN in ~/.config/fish/local.fish to avoid it.
+for attempt in 1 2 3; do
+  if mise install; then break; fi
+  [ "$attempt" -lt 3 ] && { fancy_echo "   mise install failed (attempt $attempt/3), retrying in 10s…"; sleep 10; }
+  [ "$attempt" -eq 3 ] && { fancy_echo "⚠️  mise install failed three times; continuing without it"; }
+done
 
 # moi (moi.computer) — local agent workspace UI, one server for all workspaces.
 # Installed globally with bun (which mise provides); the launchd service starts
 # it on login and keeps it running, bound to localhost only. Per-project setup
-# stays manual: `moi init` inside each repo under ~/workspace.
+# stays manual: `moi init` inside each repo under the work root.
 fancy_echo "🖥  Installing moi..."
 # The running server must go down before (re)installing — so only install
 # when absent; updates are manual (`moi update --check`).
@@ -91,7 +125,7 @@ fi
 # Per repo, kept invisible to collaborators via .git/info/exclude:
 #   bd init --stealth && bd setup claude --stealth
 #   bd setup cursor --stealth        # repos where Cursor is used
-#   bd dolt remote add origin file://$HOME/workspace/.beads-remotes/<name>
+#   bd dolt remote add origin file://$WORK_ROOT/.beads-remotes/<name>
 # (bd setup --stealth does not exclude the editor files it writes —
 # CLAUDE.md, .claude/, .cursor/ — add those to .git/info/exclude manually
 # in repos with upstreams.)
@@ -100,32 +134,40 @@ fi
 # Telemetry is disabled in config/bd/config.yaml (rcup links it to
 # ~/.config/bd/config.yaml).
 
-# ~/workspace — the root every project repo lives under (each its own git
-# repo + moi workspace; see the workspace README). Seed files come from
-# templates/workspace; the metadata repo is local-only per machine, and the
-# actual MOI/beads state arrives via Syncthing pairing.
-fancy_echo "🗂  Bootstrapping ~/workspace..."
+# ~/workspace holds three things: personal/ (the private personal workspace
+# repo: skills, notes, personal projects), the work root (default work/,
+# override with WORKSPACE_WORK_ROOT — every work repo, plus the local-only
+# metadata repo that carries .moi-objects and .beads-remotes) and dotfiles/
+# (this repo). Seed files for the work root come from templates/workspace; its
+# metadata repo is local-only per machine and never gets a remote. The actual
+# MOI/beads state arrives via Syncthing.
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-mkdir -p "$HOME/workspace"
+WORK_ROOT="${WORKSPACE_WORK_ROOT:-$HOME/workspace/work}"
+fancy_echo "🗂  Bootstrapping $WORK_ROOT..."
+mkdir -p "$HOME/workspace/personal" "$WORK_ROOT"
 for f in README.md .gitignore .stignore; do
-  if [ ! -f "$HOME/workspace/$f" ]; then
-    cp "$SCRIPT_DIR/templates/workspace/$f" "$HOME/workspace/$f"
+  if [ ! -f "$WORK_ROOT/$f" ]; then
+    cp "$SCRIPT_DIR/templates/workspace/$f" "$WORK_ROOT/$f"
   fi
 done
-if [ ! -d "$HOME/workspace/.git" ]; then
-  git -C "$HOME/workspace" init -q
-  git -C "$HOME/workspace" add -A
-  git -C "$HOME/workspace" commit -qm "Bootstrap workspace metadata"
+if [ ! -d "$WORK_ROOT/.git" ]; then
+  git -C "$WORK_ROOT" init -q
+  git -C "$WORK_ROOT" add -A
+  git -C "$WORK_ROOT" commit -qm "Bootstrap workspace metadata"
 fi
+# Personal skills live in the personal repo and are symlinked (never copied)
+# into ~/.claude/skills. Clone it, then:
+#   for s in ~/workspace/personal/skills/*/; do
+#     ln -sfn "$s" ~/.claude/skills/$(basename "$s"); done
 
-# Syncthing — p2p sync for the ~/workspace MOI layer, GUI on 127.0.0.1:8384.
+# Syncthing — p2p sync for the work root's MOI layer, GUI on 127.0.0.1:8384.
 # The .stignore allowlist (kept in the workspace repo) syncs only .moi-objects
 # and workspace metadata — never code repos, which sync via their own remotes.
 fancy_echo "🔄 Starting Syncthing..."
 if ! brew services list | grep -Eq "^syncthing\s+started"; then
   brew services start syncthing
 fi
-fancy_echo "   Pair devices at http://127.0.0.1:8384 and share the workspace-moi folder (path: ~/workspace) to receive .moi-objects and .beads-remotes."
+fancy_echo "   Pair devices at http://127.0.0.1:8384 and share the workspace-moi folder (path: $WORK_ROOT) to receive .moi-objects and .beads-remotes."
 
 # Hermes Agent — provider-agnostic coding harness (and a moi harness:
 # `moi init --harness=hermes`). Not on Homebrew; the installer is fetched
@@ -135,7 +177,7 @@ fancy_echo "   Pair devices at http://127.0.0.1:8384 and share the workspace-moi
 # Global agent skills — installed via the skills CLI (skills.sh) rather
 # than vendored into this repo, same philosophy as brew/bun: dotfiles
 # declare, installers fetch. Add new skills to the list below.
-# Work-specific skills (e.g. eva-token) stay machine-local, never here.
+# Work-specific skills stay machine-local, never here.
 fancy_echo "🧩 Installing agent skills..."
 AGENT_SKILLS="humanlayer/skills:show-me"
 for entry in $AGENT_SKILLS; do

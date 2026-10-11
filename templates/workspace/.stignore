@@ -1,5 +1,5 @@
 // Syncthing allowlist — sync ONLY the MOI layer of this workspace.
-// Codebases and repos (agents/, ai-agent-eva/, dotfiles/, ...) sync via
+// Codebases and repos (every child repo here) sync via
 // their own git remotes and must never travel through Syncthing.
 // First match wins: machine-generated dirs first, then includes, then
 // ignore everything else.

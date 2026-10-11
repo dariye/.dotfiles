@@ -1,0 +1,64 @@
+#!/bin/bash
+# Fail if anything employer-specific, secret-like or machine-specific is about
+# to land in this PUBLIC repo. Used by .githooks/pre-commit (staged files) and
+# by CI (whole tree). Allowlist exact lines in .leak-allow. A repo can replace
+# the default pattern list with its own: one extended regex per line in
+# .leak-patterns at its root (lines starting with # are comments). Terms that
+# would themselves be a leak if published (an employer's name, project names)
+# go in ~/.config/leak-check/patterns, same format, never in this repo; the
+# pre-commit hook picks them up, CI runs with the public defaults only.
+#
+#   scripts/leak-check            # whole tree
+#   scripts/leak-check --staged   # files staged for commit
+#   scripts/leak-check <file>...  # given files
+set -uo pipefail
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+PATTERNS=(
+  # harness config that is machine- or employer-specific
+  '"environment": \['          # claude autoMode environment block
+  # secrets
+  'ghp_[A-Za-z0-9]{20,}' 'gh[ousr]_[A-Za-z0-9]{20,}' 'sk-[A-Za-z0-9_-]{16,}'
+  'AKIA[0-9A-Z]{16}' 'BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY'
+  '(api[_-]?key|secret|token|password)["'"'"']?\s*[:=]\s*["'"'"']?[A-Za-z0-9/+_-]{12,}'
+  # machine / identity specific
+  '/Users/[a-z]' '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}'
+  '[0-9]{8,}'                  # account numbers, ids
+)
+if [ -f .leak-patterns ]; then
+  RE="$(grep -vE '^\s*(#|$)' .leak-patterns | paste -sd'|' -)"
+else
+  RE="$(IFS='|'; echo "${PATTERNS[*]}")"
+fi
+LOCAL="$HOME/.config/leak-check/patterns"
+if [ -f "$LOCAL" ]; then
+  extra="$(grep -vE '^\s*(#|$)' "$LOCAL" | paste -sd'|' -)"
+  [ -n "$extra" ] && RE="$RE|$extra"
+fi
+
+MODE=tree
+if [ "${1:-}" = "--staged" ]; then
+  MODE=staged; FILES="$(git diff --cached --name-only --diff-filter=ACMR)"
+elif [ $# -gt 0 ]; then
+  FILES="$(printf '%s\n' "$@")"
+else
+  FILES="$(git ls-files)"
+fi
+
+ALLOW=.leak-allow
+hits=0
+while IFS= read -r f; do
+  [ -n "$f" ] && [ -f "$f" ] || continue
+  case "$f" in *.png|*.jpg|*.pdf|*.lock.json|"$ALLOW"|.leak-patterns|scripts/leak-check) continue;; esac
+  if [ "$MODE" = staged ]; then src() { git show ":$f"; }; else src() { cat "$f"; }; fi
+  while IFS= read -r line; do
+    if [ -f "$ALLOW" ] && grep -qxF -- "${line#*:}" "$ALLOW"; then continue; fi
+    printf '%s:%s\n' "$f" "$line"; hits=$((hits+1))
+  done < <(src | grep -nIiE -- "$RE" || true)
+done <<< "$FILES"
+
+if [ "$hits" -gt 0 ]; then
+  echo "leak-check: $hits suspicious line(s). Remove them, or add the exact line to $ALLOW if it is genuinely public." >&2
+  exit 1
+fi
+echo "leak-check: clean"

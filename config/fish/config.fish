@@ -19,3 +19,8 @@ fish_add_path $HOME/.local/bin $HOME/go/bin
 
 starship init fish | source
 mise activate fish | source
+
+
+# Machine-local additions (installer-appended PATH lines, tokens such as
+# GITHUB_TOKEN for mise) live in an untracked file, never in this repo.
+test -f ~/.config/fish/local.fish; and source ~/.config/fish/local.fish
