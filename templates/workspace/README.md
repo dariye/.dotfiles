@@ -1,10 +1,12 @@
-# workspace
+# workspace/economic
+
+The work root. Sibling `../personal/` is the personal workspace repo and
+`../dotfiles/` is machine setup; nothing here is ever pushed to a remote.
 
 Convention for this directory:
 
 - **Each subdirectory is an independent code repository** with its own git
-  history and its own MOI workspace (`moi init` run inside it). Exception:
-  `dotfiles/` is not a MOI workspace — it only stores machine setup.
+  history and its own MOI workspace (`moi init` run inside it).
 - **This root repo tracks MOI/workspace metadata only** — never child repo
   code or secrets. The root `.gitignore` is an allowlist: everything is
   ignored unless explicitly whitelisted, so new repos brought into this
@@ -14,15 +16,15 @@ Convention for this directory:
 ## Adding a new project
 
 ```sh
-git clone <repo> ~/workspace/<name>   # or move it in
-cd ~/workspace/<name>
+git clone <repo> ~/workspace/economic/<name>   # or move it in
+cd ~/workspace/economic/<name>
 moi init && moi skill update
 
 # beads (agent memory layer, invisible to repo collaborators)
 bd init --stealth && bd setup claude --stealth
 printf '/CLAUDE.md\n/.claude/\n' >> .git/info/exclude
 mkdir -p ../.beads-remotes/<name>
-bd dolt remote add origin file://$HOME/workspace/.beads-remotes/<name>
+bd dolt remote add origin file://$HOME/workspace/economic/.beads-remotes/<name>
 ```
 
 ## Agent memory (beads)
@@ -63,6 +65,5 @@ sync `.stignore` itself).
 
 ## Dotfiles
 
-`dotfiles/` is the rcm-managed dotfiles repo (moved from `~/.dotfiles`;
-`DOTFILES_DIRS` in `rcrc` points here). Manage with `mkrc <file>` /
-`rcup` / `lsrc`.
+`../dotfiles/` is the rcm-managed dotfiles repo (`DOTFILES_DIRS` in `rcrc`
+points there). Manage with `mkrc <file>` / `rcup` / `lsrc`.

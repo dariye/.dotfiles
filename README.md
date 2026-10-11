@@ -13,8 +13,8 @@ Laptop setup for my Apple Silicon Mac (M-series) running macOS Sonoma or later.
 ### Getting started
 
 ```bash
-# clone repository — this repo lives inside ~/workspace, the root that holds
-# every project repo (each its own git repo + moi workspace)
+# clone repository — this repo lives inside ~/workspace next to personal/
+# and economic/ (see "Workspace layout" below)
 git clone git@github.com:dariye/.dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
@@ -32,10 +32,26 @@ source ~/.config/fish/config.fish
 ```
 
 `mac-setup` runs `rcup` itself, before `mise install` — the mise config has to be
-linked into `~/.config` before mise can read it. It also bootstraps `~/workspace`
-(seed files from `templates/workspace/`, local metadata git repo) — the actual
-MOI widgets and beads memory arrive once you pair Syncthing and share the
-`workspace-moi` folder.
+linked into `~/.config` before mise can read it. It also bootstraps the work
+root `~/workspace/economic` (seed files from `templates/workspace/`, local
+metadata git repo) — the actual MOI widgets and beads memory arrive once you
+pair Syncthing and share the `workspace-moi` folder.
+
+## Workspace layout
+
+`~/workspace` holds exactly three directories, so work and personal material
+never share a git remote:
+
+| Directory | What | Remote |
+|---|---|---|
+| `personal/` | Personal workspace repo: Claude skills, notes, personal projects (each its own repo, gitignored) | private GitHub repo |
+| `economic/` | Work root: every work repo, plus the local-only metadata repo carrying `.moi-objects/` and `.beads-remotes/` | **none** — local-only, carried by Syncthing |
+| `dotfiles/` | This repo | public |
+
+Personal Claude skills live in `personal/skills/` and are **symlinked** into
+`~/.claude/skills/` (never copied), so one edit updates every session. Work
+conventions (global `CLAUDE.md`, rules, hooks) come from the team's knowledge
+repo, not from here.
 
 
 ## The agent's brain
@@ -50,14 +66,14 @@ write.
 | `bd remember` | ≤1-paragraph operational facts and gotchas | Until falsified | Pushed into every session via `bd prime` |
 | `.claude/skills/` (per repo) | Procedures for a recurring task type (e.g. `moi-workspace`) | Life of the task type | Auto-loaded on task match |
 | `CLAUDE.md` / `AGENTS.md` (per repo, stealth) | Harness ground rules for the repo | Until revised | Read at session start |
-| `.moi-objects/` (in `~/workspace`) | The workspace UI itself — widgets, views, dashboards | Until rebuilt | Rendered by the moi server; carried by Syncthing |
+| `.moi-objects/` (in `~/workspace/economic`) | The workspace UI itself — widgets, views, dashboards | Until rebuilt | Rendered by the moi server; carried by Syncthing |
 | This dotfiles repo | Machine setup + carried harness config (`claude/settings.json`) | Until replaced | Linked by `rcup` |
 | `~/.hermes` | Hermes' own scratch memory | Scratch | Hermes only — never canonical; beads is |
 
 Two rules keep this honest: **beads is the single canonical memory** (every
 other store is either config, procedure, or scratch), and **memory never
 touches work git remotes** (beads syncs via `file://` Dolt remotes under
-`~/workspace/.beads-remotes/`, carried by Syncthing).
+`~/workspace/economic/.beads-remotes/`, carried by Syncthing).
 
 ## My programs
 All of these are installed by `mac-setup`, via the Brewfile unless noted.
@@ -119,9 +135,9 @@ All of these are installed by `mac-setup`, via the Brewfile unless noted.
     <summary>AI</summary>
     <ul>
         <li><a href="https://ollama.com/">Ollama</a></li>
-        <li><a href="https://github.com/gastownhall/beads">beads</a> — the memory layer for coding agents (<code>bd</code>), backed by an embedded <a href="https://www.dolthub.com/">Dolt</a> engine (the Brewfile's <code>dolt</code> CLI inspects and backs up the databases; <code>mac-setup</code> sets its commit identity). Per-repo: <code>bd init --stealth</code> + <code>bd setup claude --stealth</code> keep everything out of git via <code>.git/info/exclude</code>, so collaborators never see it. Cross-machine sync via <code>bd dolt push/pull</code> against <code>file://</code> Dolt remotes under <code>~/workspace/.beads-remotes/</code> (carried by Syncthing) — never against work git remotes. Telemetry is disabled globally via <code>config/bd/config.yaml</code>.</li>
+        <li><a href="https://github.com/gastownhall/beads">beads</a> — the memory layer for coding agents (<code>bd</code>), backed by an embedded <a href="https://www.dolthub.com/">Dolt</a> engine (the Brewfile's <code>dolt</code> CLI inspects and backs up the databases; <code>mac-setup</code> sets its commit identity). Per-repo: <code>bd init --stealth</code> + <code>bd setup claude --stealth</code> keep everything out of git via <code>.git/info/exclude</code>, so collaborators never see it. Cross-machine sync via <code>bd dolt push/pull</code> against <code>file://</code> Dolt remotes under <code>~/workspace/economic/.beads-remotes/</code> (carried by Syncthing) — never against work git remotes. Telemetry is disabled globally via <code>config/bd/config.yaml</code>.</li>
         <li><a href="https://moi.computer/">moi</a> — local agent workspace UI, installed globally with bun by <code>mac-setup</code> (not on Homebrew). Runs as a launchd service on <code>localhost:13337</code>; run <code>moi init</code> inside each project repo. <code>config/fish/conf.d/bun.fish</code> puts <code>~/.bun/bin</code> on PATH for it.</li>
-        <li>Claude Code — global settings travel as <code>claude/settings.json</code> (rcup links it to <code>~/.claude/settings.json</code>); machine-local state (sessions, history) stays out.</li>
+        <li>Claude Code — the portable baseline (theme, model, permissions, generic safety hook, plugins) travels as <code>claude/settings.json</code> (rcup links it to <code>~/.claude/settings.json</code>). Anything employer-specific — auto-mode environment, work hooks, the global <code>CLAUDE.md</code> — is added on the machine and never committed here; diff before re-running <code>rcup</code> so it is not overwritten. Personal skills come from the personal workspace repo (see "Workspace layout").</li>
         <li>Agent skills — installed by <code>mac-setup</code> via the <a href="https://www.skills.sh/">skills CLI</a> (see <code>AGENT_SKILLS</code> there; currently <code>show-me</code>), not vendored into this repo. Work-specific skills (e.g. <code>eva-token</code>) stay machine-local.</li>
         <li><a href="https://cursor.com/">Cursor</a> — via the Brewfile cask. Shares each repo's beads memory: <code>bd setup cursor --stealth</code> alongside the claude recipe. Not a moi harness.</li>
         <li><a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a> — installed by <code>mac-setup</code> (not on Homebrew). Provider-agnostic and a moi harness (<code>moi init --harness=hermes</code>). House rules: run <code>hermes setup</code> to pick a provider/model; no messaging gateways on a work machine; <code>~/.hermes</code> is scratch — beads stays the canonical memory.</li>

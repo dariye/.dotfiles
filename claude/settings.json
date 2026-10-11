@@ -1,4 +1,54 @@
 {
-  "model": "opus[1m]",
+  "autoMode": {
+    "soft_deny": [
+      "$defaults"
+    ]
+  },
+  "effortLevel": "high",
+  "enabledPlugins": {
+    "cloudflare@cloudflare": true
+  },
+  "env": {
+    "CLAUDE_CODE_SUBAGENT_MODEL": "opus"
+  },
+  "extraKnownMarketplaces": {
+    "cloudflare": {
+      "source": {
+        "repo": "cloudflare/skills",
+        "source": "github"
+      }
+    }
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "cmd=$(jq -r '.tool_input.command // \"\"'); if echo \"$cmd\" | grep -qiE 'rm -rf /|rm -rf ~|drop\\s+(table|database)|git push.*--force.*main|git reset --hard|shutdown|reboot|mkfs|dd if='; then printf '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"Potentially destructive command detected: %s\" }}' \"$(echo \"$cmd\" | head -c 120)\"; fi 2>/dev/null || true",
+            "statusMessage": "Safety check...",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ]
+  },
+  "model": "fable",
+  "modelSettings": {
+    "claude-fable-5-1": {
+      "effortLevel": "low"
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Read",
+      "Write"
+    ],
+    "deny": []
+  },
   "theme": "dark-ansi"
 }

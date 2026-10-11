@@ -68,7 +68,7 @@ mise install
 # moi (moi.computer) — local agent workspace UI, one server for all workspaces.
 # Installed globally with bun (which mise provides); the launchd service starts
 # it on login and keeps it running, bound to localhost only. Per-project setup
-# stays manual: `moi init` inside each repo under ~/workspace.
+# stays manual: `moi init` inside each repo under ~/workspace/economic.
 fancy_echo "🖥  Installing moi..."
 # The running server must go down before (re)installing — so only install
 # when absent; updates are manual (`moi update --check`).
@@ -91,7 +91,7 @@ fi
 # Per repo, kept invisible to collaborators via .git/info/exclude:
 #   bd init --stealth && bd setup claude --stealth
 #   bd setup cursor --stealth        # repos where Cursor is used
-#   bd dolt remote add origin file://$HOME/workspace/.beads-remotes/<name>
+#   bd dolt remote add origin file://$HOME/workspace/economic/.beads-remotes/<name>
 # (bd setup --stealth does not exclude the editor files it writes —
 # CLAUDE.md, .claude/, .cursor/ — add those to .git/info/exclude manually
 # in repos with upstreams.)
@@ -100,32 +100,39 @@ fi
 # Telemetry is disabled in config/bd/config.yaml (rcup links it to
 # ~/.config/bd/config.yaml).
 
-# ~/workspace — the root every project repo lives under (each its own git
-# repo + moi workspace; see the workspace README). Seed files come from
-# templates/workspace; the metadata repo is local-only per machine, and the
-# actual MOI/beads state arrives via Syncthing pairing.
-fancy_echo "🗂  Bootstrapping ~/workspace..."
+# ~/workspace holds three things: personal/ (the private personal workspace
+# repo: skills, notes, personal projects), economic/ (the work root — every
+# work repo, plus the local-only metadata repo that carries .moi-objects and
+# .beads-remotes) and dotfiles/ (this repo). Seed files for the work root come
+# from templates/workspace; its metadata repo is local-only per machine and
+# never gets a remote. The actual MOI/beads state arrives via Syncthing.
+fancy_echo "🗂  Bootstrapping ~/workspace/economic..."
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-mkdir -p "$HOME/workspace"
+WORK_ROOT="$HOME/workspace/economic"
+mkdir -p "$HOME/workspace/personal" "$WORK_ROOT"
 for f in README.md .gitignore .stignore; do
-  if [ ! -f "$HOME/workspace/$f" ]; then
-    cp "$SCRIPT_DIR/templates/workspace/$f" "$HOME/workspace/$f"
+  if [ ! -f "$WORK_ROOT/$f" ]; then
+    cp "$SCRIPT_DIR/templates/workspace/$f" "$WORK_ROOT/$f"
   fi
 done
-if [ ! -d "$HOME/workspace/.git" ]; then
-  git -C "$HOME/workspace" init -q
-  git -C "$HOME/workspace" add -A
-  git -C "$HOME/workspace" commit -qm "Bootstrap workspace metadata"
+if [ ! -d "$WORK_ROOT/.git" ]; then
+  git -C "$WORK_ROOT" init -q
+  git -C "$WORK_ROOT" add -A
+  git -C "$WORK_ROOT" commit -qm "Bootstrap workspace metadata"
 fi
+# Personal skills live in the personal repo and are symlinked (never copied)
+# into ~/.claude/skills. Clone it, then:
+#   for s in ~/workspace/personal/skills/*/; do
+#     ln -sfn "$s" ~/.claude/skills/$(basename "$s"); done
 
-# Syncthing — p2p sync for the ~/workspace MOI layer, GUI on 127.0.0.1:8384.
+# Syncthing — p2p sync for the work root's MOI layer, GUI on 127.0.0.1:8384.
 # The .stignore allowlist (kept in the workspace repo) syncs only .moi-objects
 # and workspace metadata — never code repos, which sync via their own remotes.
 fancy_echo "🔄 Starting Syncthing..."
 if ! brew services list | grep -Eq "^syncthing\s+started"; then
   brew services start syncthing
 fi
-fancy_echo "   Pair devices at http://127.0.0.1:8384 and share the workspace-moi folder (path: ~/workspace) to receive .moi-objects and .beads-remotes."
+fancy_echo "   Pair devices at http://127.0.0.1:8384 and share the workspace-moi folder (path: ~/workspace/economic) to receive .moi-objects and .beads-remotes."
 
 # Hermes Agent — provider-agnostic coding harness (and a moi harness:
 # `moi init --harness=hermes`). Not on Homebrew; the installer is fetched
