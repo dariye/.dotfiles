@@ -9,7 +9,7 @@
 #   scripts/leak-check --staged   # files staged for commit
 #   scripts/leak-check <file>...  # given files
 set -uo pipefail
-cd "$(git rev-parse --show-toplevel)"
+cd "$(git rev-parse --show-toplevel)" || exit 1
 
 PATTERNS=(
   # employer / work-internal
@@ -44,7 +44,7 @@ ALLOW=.leak-allow
 hits=0
 while IFS= read -r f; do
   [ -n "$f" ] && [ -f "$f" ] || continue
-  case "$f" in *.png|*.jpg|*.pdf|*.lock.json|$ALLOW|.leak-patterns|scripts/leak-check) continue;; esac
+  case "$f" in *.png|*.jpg|*.pdf|*.lock.json|"$ALLOW"|.leak-patterns|scripts/leak-check) continue;; esac
   if [ "$MODE" = staged ]; then src() { git show ":$f"; }; else src() { cat "$f"; }; fi
   while IFS= read -r line; do
     if [ -f "$ALLOW" ] && grep -qxF -- "${line#*:}" "$ALLOW"; then continue; fi

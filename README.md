@@ -25,6 +25,9 @@ git config --global user.email "you@example.com"
 # make setup script executable
 chmod +x mac-setup
 
+# see what a run would change (nothing is modified)
+./mac-setup --check
+
 # run setup script (links dotfiles via rcm, then installs runtimes)
 ./mac-setup
 
@@ -36,6 +39,10 @@ linked into `~/.config` before mise can read it. It also bootstraps the work
 root `~/workspace/economic` (seed files from `templates/workspace/`, local
 metadata git repo) — the actual MOI widgets and beads memory arrive once you
 pair Syncthing and share the `workspace-moi` folder.
+
+Machine-local shell additions (installer-appended PATH lines, `GITHUB_TOKEN`
+for mise) go in `~/.config/fish/local.fish`, which `config.fish` sources if
+present and which is never tracked here.
 
 ## Workspace layout
 
@@ -95,6 +102,15 @@ nothing employer-specific, secret-like or machine-specific lands in it:
 roots, every rcm link, skill symlinks, moi registry paths and server, beads
 `file://` remotes, the Syncthing folder path, and the leak-guard hooks. Run it
 after moving anything; the personal admin skill runs it monthly.
+
+## Follow-ups
+
+- Portable `gitconfig` (rebase on pull, rerere, default branch, aliases) with
+  `[include] path = ~/.gitconfig.local` for identity and signing. Needs the
+  identity moved into the local file before `rcup` can own `~/.gitconfig`.
+- `scripts/backup <dest>`: ssh, gnupg and a curated `~/.claude` to an external
+  path before a rebuild. Output holds secrets, so it must refuse any
+  destination inside this repo.
 
 ## My programs
 All of these are installed by `mac-setup`, via the Brewfile unless noted.

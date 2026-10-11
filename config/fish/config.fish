@@ -20,9 +20,7 @@ fish_add_path $HOME/.local/bin $HOME/go/bin
 starship init fish | source
 mise activate fish | source
 
-# kimi-code
-fish_add_path -g "$HOME/.kimi-code/bin"
 
-# Added by LM Studio CLI (lms)
-fish_add_path -g "$HOME/.lmstudio/bin"
-# End of LM Studio CLI section
+# Machine-local additions (installer-appended PATH lines, tokens such as
+# GITHUB_TOKEN for mise) live in an untracked file, never in this repo.
+test -f ~/.config/fish/local.fish; and source ~/.config/fish/local.fish

@@ -60,6 +60,8 @@ brew "protobuf"
 brew "rcm"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
+# Static analysis for shell scripts
+brew "shellcheck"
 # Cross-shell prompt for astronauts
 brew "starship"
 # Open source continuous file synchronization application

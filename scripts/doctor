@@ -15,7 +15,7 @@ warn() { printf '  warn  %s\n' "$1"; }
 check(){ if eval "$2"; then ok "$1"; else bad "$1"; fi; }   # name, test expression
 
 echo "workspace layout"
-check "~/workspace holds exactly personal/ economic/ dotfiles/" \
+check "\$HOME/workspace holds exactly personal/ economic/ dotfiles/" \
   '[ "$(ls -1 "$W" | sort | tr "\n" " ")" = "dotfiles economic personal " ]'
 check "economic/ metadata repo has no git remote" \
   '[ -d "$WORK/.git" ] && [ -z "$(git -C "$WORK" remote)" ]'
@@ -28,13 +28,14 @@ if command -v lsrc >/dev/null; then
     if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then ok "$dst"; else bad "$dst not linked to $src"; fi
   done < <(env RCRC="$DOT/rcrc" lsrc)
 else warn "rcm not installed"; fi
-check "~/.claude/settings.json is a plain file (seeded, not linked)" \
+check "\$HOME/.claude/settings.json is a plain file (seeded, not linked)" \
   '[ -f "$HOME/.claude/settings.json" ] && [ ! -L "$HOME/.claude/settings.json" ]'
 
 echo "claude skills"
 for s in "$PERS"/skills/*/; do
   n="$(basename "$s")"; link="$HOME/.claude/skills/$n"
-  if [ -L "$link" ] && [ "$(readlink "$link")" = "$s" -o "$(readlink "$link")" = "${s%/}" ]; then ok "$n -> personal/skills"
+  t="$(readlink "$link" 2>/dev/null || true)"
+  if [ -L "$link" ] && { [ "$t" = "$s" ] || [ "$t" = "${s%/}" ]; }; then ok "$n -> personal/skills"
   elif [ -d "$link" ]; then bad "$n is a COPY in ~/.claude/skills (should be a symlink)"
   else bad "$n not linked into ~/.claude/skills"; fi
 done

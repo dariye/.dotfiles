@@ -8,6 +8,8 @@ jobs:
         with: { fetch-depth: 0 }
       - name: Work-content and secret patterns
         run: scripts/leak-check
+      - name: shellcheck
+        run: shellcheck -S warning mac-setup scripts/leak-check scripts/doctor .githooks/pre-commit
       - name: gitleaks (full history)
         uses: gitleaks/gitleaks-action@v2
         env:

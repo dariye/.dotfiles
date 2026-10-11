@@ -1,3 +1,8 @@
+[settings]
+disable_backends = ["asdf"]
+github_attestations = true
+idiomatic_version_file_enable_tools = ["node", "go"]
+
 [env]
 _.file = "./.env"
 

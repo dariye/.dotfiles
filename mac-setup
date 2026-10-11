@@ -12,6 +12,23 @@ fancy_echo() {
   printf "\\n%b\\n" "$1"
 }
 
+# --check: report what a run would do (missing brews, runtimes, links), no changes.
+if [ "${1:-}" = "--check" ]; then
+  eval "$($HOMEBREW_PREFIX/bin/brew shellenv 2>/dev/null || true)"
+  fancy_echo "🍻 Brewfile:";  brew bundle check --file=./Brewfile --verbose || true
+  fancy_echo "📦 mise:";      mise ls --missing 2>/dev/null || echo "   mise not installed"
+  fancy_echo "🔗 rcm links (target:source):"; env RCRC="$HOME/workspace/dotfiles/rcrc" lsrc 2>/dev/null || echo "   rcm not installed"
+  fancy_echo "🩺 doctor:";    "$(dirname "$0")/scripts/doctor" --quiet || true
+  exit 0
+fi
+
+# The steps below prompt (Xcode CLT dialog, sudo, chsh). Refuse to run them
+# unattended instead of hanging forever.
+if [ ! -t 0 ]; then
+  fancy_echo "⚠️  mac-setup needs an interactive terminal (it prompts for Xcode tools, sudo and chsh). Run it from a shell, or use --check."
+  exit 1
+fi
+
 if [ "$(uname -m)" != "arm64" ]; then
   fancy_echo "⚠️  This script is optimized for Apple Silicon (M-series) Macs"
   exit 1
@@ -74,7 +91,13 @@ if [ -n "$ICU_PREFIX" ]; then
   export PKG_CONFIG_PATH="$ICU_PREFIX/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
 fi
 mise trust "$XDG_CONFIG_HOME/mise/config.toml"
-mise install
+# GitHub's unauthenticated API limit bites on a fresh machine; mise treats a
+# 403 as permanent, so retry. Set GITHUB_TOKEN in ~/.config/fish/local.fish to avoid it.
+for attempt in 1 2 3; do
+  if mise install; then break; fi
+  [ "$attempt" -lt 3 ] && { fancy_echo "   mise install failed (attempt $attempt/3), retrying in 10s…"; sleep 10; }
+  [ "$attempt" -eq 3 ] && { fancy_echo "⚠️  mise install failed three times; continuing without it"; }
+done
 
 # moi (moi.computer) — local agent workspace UI, one server for all workspaces.
 # Installed globally with bun (which mise provides); the launchd service starts
