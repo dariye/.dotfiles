@@ -1,4 +1,4 @@
-# workspace/economic
+# workspace: work root
 
 The work root. Sibling `../personal/` is the personal workspace repo and
 `../dotfiles/` is machine setup; nothing here is ever pushed to a remote.
@@ -16,15 +16,15 @@ Convention for this directory:
 ## Adding a new project
 
 ```sh
-git clone <repo> ~/workspace/economic/<name>   # or move it in
-cd ~/workspace/economic/<name>
+git clone <repo> $WORKSPACE_WORK_ROOT/<name>   # or move it in
+cd $WORKSPACE_WORK_ROOT/<name>
 moi init && moi skill update
 
 # beads (agent memory layer, invisible to repo collaborators)
 bd init --stealth && bd setup claude --stealth
 printf '/CLAUDE.md\n/.claude/\n' >> .git/info/exclude
 mkdir -p ../.beads-remotes/<name>
-bd dolt remote add origin file://$HOME/workspace/economic/.beads-remotes/<name>
+bd dolt remote add origin file://$WORKSPACE_WORK_ROOT/.beads-remotes/<name>
 ```
 
 ## Agent memory (beads)

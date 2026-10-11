@@ -3,7 +3,10 @@
 # to land in this PUBLIC repo. Used by .githooks/pre-commit (staged files) and
 # by CI (whole tree). Allowlist exact lines in .leak-allow. A repo can replace
 # the default pattern list with its own: one extended regex per line in
-# .leak-patterns at its root (lines starting with # are comments).
+# .leak-patterns at its root (lines starting with # are comments). Terms that
+# would themselves be a leak if published (an employer's name, project names)
+# go in ~/.config/leak-check/patterns, same format, never in this repo; the
+# pre-commit hook picks them up, CI runs with the public defaults only.
 #
 #   scripts/leak-check            # whole tree
 #   scripts/leak-check --staged   # files staged for commit
@@ -12,15 +15,12 @@ set -uo pipefail
 cd "$(git rev-parse --show-toplevel)" || exit 1
 
 PATTERNS=(
-  # employer / work-internal
-  'e-conomic' 'visma' '@economic' 'ai-agent-eva' 'zenith' 'intercom'
-  'identity ?server' 'ai_agent_eva' 'eva-token' '\beva\b' 'monolith/' 'inject-vault' 'contextvault'
+  # harness config that is machine- or employer-specific
   '"environment": \['          # claude autoMode environment block
   # secrets
   'ghp_[A-Za-z0-9]{20,}' 'gh[ousr]_[A-Za-z0-9]{20,}' 'sk-[A-Za-z0-9_-]{16,}'
   'AKIA[0-9A-Z]{16}' 'BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY'
   '(api[_-]?key|secret|token|password)["'"'"']?\s*[:=]\s*["'"'"']?[A-Za-z0-9/+_-]{12,}'
-  'CLOUDFLARE_[A-Z_]*TOKEN' 'EVA_CLIENT'
   # machine / identity specific
   '/Users/[a-z]' '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}'
   '[0-9]{8,}'                  # account numbers, ids
@@ -29,6 +29,11 @@ if [ -f .leak-patterns ]; then
   RE="$(grep -vE '^\s*(#|$)' .leak-patterns | paste -sd'|' -)"
 else
   RE="$(IFS='|'; echo "${PATTERNS[*]}")"
+fi
+LOCAL="$HOME/.config/leak-check/patterns"
+if [ -f "$LOCAL" ]; then
+  extra="$(grep -vE '^\s*(#|$)' "$LOCAL" | paste -sd'|' -)"
+  [ -n "$extra" ] && RE="$RE|$extra"
 fi
 
 MODE=tree

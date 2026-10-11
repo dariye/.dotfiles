@@ -7,7 +7,9 @@
 #   scripts/doctor --quiet # failures only
 set -uo pipefail
 QUIET=0; [ "${1:-}" = "--quiet" ] && QUIET=1
-W="$HOME/workspace"; WORK="$W/economic"; PERS="$W/personal"; DOT="$W/dotfiles"
+# The work root defaults to ~/workspace/work; override with WORKSPACE_WORK_ROOT
+# (set it in ~/.config/fish/local.fish, never here).
+W="$HOME/workspace"; WORK="${WORKSPACE_WORK_ROOT:-$W/work}"; PERS="$W/personal"; DOT="$W/dotfiles"; WORKNAME="$(basename "$WORK")"
 fail=0
 ok()   { [ $QUIET = 1 ] || printf '  ok    %s\n' "$1"; }
 bad()  { printf '  FAIL  %s\n' "$1"; fail=$((fail+1)); }
@@ -15,9 +17,9 @@ warn() { printf '  warn  %s\n' "$1"; }
 check(){ if eval "$2"; then ok "$1"; else bad "$1"; fi; }   # name, test expression
 
 echo "workspace layout"
-check "\$HOME/workspace holds exactly personal/ economic/ dotfiles/" \
-  '[ "$(ls -1 "$W" | sort | tr "\n" " ")" = "dotfiles economic personal " ]'
-check "economic/ metadata repo has no git remote" \
+check "\$HOME/workspace holds exactly personal/ $WORKNAME/ dotfiles/" \
+  '[ "$(ls -1 "$W" | sort | tr "\n" " ")" = "$(printf "%s\n" dotfiles personal "$WORKNAME" | sort | tr "\n" " ")" ]'
+check "$WORKNAME/ metadata repo has no git remote" \
   '[ -d "$WORK/.git" ] && [ -z "$(git -C "$WORK" remote)" ]'
 check "personal/ is a git repo with a remote" \
   '[ -n "$(git -C "$PERS" remote 2>/dev/null)" ]'
@@ -76,7 +78,7 @@ echo "syncthing"
 ST="$HOME/Library/Application Support/Syncthing/config.xml"
 if [ -f "$ST" ]; then
   p="$(grep -o 'id="workspace-moi"[^>]*path="[^"]*"' "$ST" | sed 's/.*path="//; s/"$//')"
-  check "workspace-moi folder path is economic/ (is: ${p:-unset})" '[ "${p%/}" = "$WORK" ]'
+  check "workspace-moi folder path is $WORKNAME/ (is: ${p:-unset})" '[ "${p%/}" = "$WORK" ]'
   if brew services list 2>/dev/null | grep -Eq "^syncthing\s+started"; then ok "syncthing service started"; else bad "syncthing service not started"; fi
 else warn "syncthing config not found"; fi
 
