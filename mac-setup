@@ -56,6 +56,17 @@ fi
 fancy_echo "🔗 Linking dotfiles..."
 env RCRC="$HOME/workspace/dotfiles/rcrc" rcup -f
 
+# Claude Code settings are SEEDED, not linked: the live ~/.claude/settings.json
+# grows machine-local, employer-specific config that must never come back
+# into this public repo, so rcup must not be able to overwrite it either.
+if [ ! -f "$HOME/.claude/settings.json" ]; then
+  mkdir -p "$HOME/.claude"
+  cp "$HOME/workspace/dotfiles/claude/settings.json" "$HOME/.claude/settings.json"
+fi
+
+# Leak guard for this repo: pre-commit runs scripts/leak-check on staged files.
+git -C "$HOME/workspace/dotfiles" config core.hooksPath .githooks
+
 fancy_echo "📦 Installing language runtimes via mise..."
 # postgres is built from source and needs pkg-config plus keg-only icu4c.
 ICU_PREFIX="$(brew --prefix icu4c 2>/dev/null || true)"

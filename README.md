@@ -75,6 +75,17 @@ other store is either config, procedure, or scratch), and **memory never
 touches work git remotes** (beads syncs via `file://` Dolt remotes under
 `~/workspace/economic/.beads-remotes/`, carried by Syncthing).
 
+## Leak guard
+
+This repo is public and sits next to a work root, so two checks make sure
+nothing employer-specific, secret-like or machine-specific lands in it:
+
+- `scripts/leak-check` greps for work terms, secret shapes, home paths, email
+  addresses and long digit runs. `.githooks/pre-commit` runs it on staged files
+  (`mac-setup` sets `core.hooksPath`); CI runs it on the whole tree plus
+  gitleaks over the full history. Genuinely public lines go in `.leak-allow`.
+- The Claude settings seed above: the live file is never linked back here.
+
 ## My programs
 All of these are installed by `mac-setup`, via the Brewfile unless noted.
 
@@ -137,7 +148,7 @@ All of these are installed by `mac-setup`, via the Brewfile unless noted.
         <li><a href="https://ollama.com/">Ollama</a></li>
         <li><a href="https://github.com/gastownhall/beads">beads</a> — the memory layer for coding agents (<code>bd</code>), backed by an embedded <a href="https://www.dolthub.com/">Dolt</a> engine (the Brewfile's <code>dolt</code> CLI inspects and backs up the databases; <code>mac-setup</code> sets its commit identity). Per-repo: <code>bd init --stealth</code> + <code>bd setup claude --stealth</code> keep everything out of git via <code>.git/info/exclude</code>, so collaborators never see it. Cross-machine sync via <code>bd dolt push/pull</code> against <code>file://</code> Dolt remotes under <code>~/workspace/economic/.beads-remotes/</code> (carried by Syncthing) — never against work git remotes. Telemetry is disabled globally via <code>config/bd/config.yaml</code>.</li>
         <li><a href="https://moi.computer/">moi</a> — local agent workspace UI, installed globally with bun by <code>mac-setup</code> (not on Homebrew). Runs as a launchd service on <code>localhost:13337</code>; run <code>moi init</code> inside each project repo. <code>config/fish/conf.d/bun.fish</code> puts <code>~/.bun/bin</code> on PATH for it.</li>
-        <li>Claude Code — the portable baseline (theme, model, permissions, generic safety hook, plugins) travels as <code>claude/settings.json</code> (rcup links it to <code>~/.claude/settings.json</code>). Anything employer-specific — auto-mode environment, work hooks, the global <code>CLAUDE.md</code> — is added on the machine and never committed here; diff before re-running <code>rcup</code> so it is not overwritten. Personal skills come from the personal workspace repo (see "Workspace layout").</li>
+        <li>Claude Code — the portable baseline (theme, model, permissions, generic safety hook, plugins) lives in <code>claude/settings.json</code>. <code>mac-setup</code> <em>copies</em> it to <code>~/.claude/settings.json</code> only when that file is absent; it is deliberately excluded from rcup, so the live file can carry employer-specific config (auto-mode environment, work hooks, the global <code>CLAUDE.md</code>) that is never committed here and never overwritten. Personal skills come from the personal workspace repo (see "Workspace layout").</li>
         <li>Agent skills — installed by <code>mac-setup</code> via the <a href="https://www.skills.sh/">skills CLI</a> (see <code>AGENT_SKILLS</code> there; currently <code>show-me</code>), not vendored into this repo. Work-specific skills (e.g. <code>eva-token</code>) stay machine-local.</li>
         <li><a href="https://cursor.com/">Cursor</a> — via the Brewfile cask. Shares each repo's beads memory: <code>bd setup cursor --stealth</code> alongside the claude recipe. Not a moi harness.</li>
         <li><a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a> — installed by <code>mac-setup</code> (not on Homebrew). Provider-agnostic and a moi harness (<code>moi init --harness=hermes</code>). House rules: run <code>hermes setup</code> to pick a provider/model; no messaging gateways on a work machine; <code>~/.hermes</code> is scratch — beads stays the canonical memory.</li>

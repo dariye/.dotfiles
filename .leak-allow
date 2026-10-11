@@ -1,0 +1,7 @@
+mas "GarageBand", id: 682658836
+mas "iMovie", id: 408981434
+mas "Keynote", id: 361285480
+mas "Numbers", id: 361304891
+mas "Pages", id: 361309726
+git clone git@github.com:dariye/.dotfiles.git ~/workspace/dotfiles
+git config --global user.email "you@example.com"
