@@ -153,7 +153,7 @@ fancy_echo "   Pair devices at http://127.0.0.1:8384 and share the workspace-moi
 # Global agent skills — installed via the skills CLI (skills.sh) rather
 # than vendored into this repo, same philosophy as brew/bun: dotfiles
 # declare, installers fetch. Add new skills to the list below.
-# Work-specific skills (e.g. eva-token) stay machine-local, never here.
+# Work-specific skills stay machine-local, never here.
 fancy_echo "🧩 Installing agent skills..."
 AGENT_SKILLS="humanlayer/skills:show-me"
 for entry in $AGENT_SKILLS; do

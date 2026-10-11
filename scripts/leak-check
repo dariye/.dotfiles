@@ -12,7 +12,7 @@ cd "$(git rev-parse --show-toplevel)"
 PATTERNS=(
   # employer / work-internal
   'e-conomic' 'visma' '@economic' 'ai-agent-eva' 'zenith' 'intercom'
-  'identity ?server' 'ai_agent_eva' 'monolith/' 'inject-vault' 'contextvault'
+  'identity ?server' 'ai_agent_eva' 'eva-token' '\beva\b' 'monolith/' 'inject-vault' 'contextvault'
   '"environment": \['          # claude autoMode environment block
   # secrets
   'ghp_[A-Za-z0-9]{20,}' 'gh[ousr]_[A-Za-z0-9]{20,}' 'sk-[A-Za-z0-9_-]{16,}'
