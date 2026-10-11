@@ -56,10 +56,20 @@ if command -v moi >/dev/null || [ -x "$HOME/.bun/bin/moi" ]; then
 else warn "moi not installed"; fi
 
 echo "beads remotes"
+# The URL Dolt actually pushes to lives inside the embedded database, not in
+# .beads/config.yaml, so ask bd rather than grepping the file.
 for cfg in "$WORK"/*/.beads/config.yaml; do
   [ -f "$cfg" ] || continue
-  r="$(grep -o 'file://[^"]*' "$cfg" | head -1)"; d="${r#file://}"
-  if [ -d "$d" ]; then ok "$(basename "$(dirname "$(dirname "$cfg")")") -> $d"; else bad "beads remote missing: $r"; fi
+  repo="$(dirname "$(dirname "$cfg")")"; n="$(basename "$repo")"
+  if command -v bd >/dev/null; then
+    r="$(cd "$repo" && bd dolt remote list 2>/dev/null | awk '$1=="origin"{print $2}')"
+  else
+    r="$(grep -o 'file://[^"]*' "$cfg" | head -1)"
+  fi
+  d="${r#file://}"
+  if [ -z "$r" ]; then bad "$n: no beads origin remote"
+  elif [ -d "$d" ]; then ok "$n -> $d"
+  else bad "$n: beads remote missing: $r"; fi
 done
 
 echo "syncthing"
