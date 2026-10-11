@@ -1,2 +1,2 @@
-EXCLUDES="README*.md .gitignore LICENSE .git* .github .githooks .leak-allow mac-setup Brewfile Brewfile.lock.json screenshot.png templates scripts claude"
+EXCLUDES="README*.md .gitignore LICENSE .git* .github .githooks .leak-allow mac-setup Brewfile Brewfile.lock.json screenshot.png templates scripts claude/settings.json"
 DOTFILES_DIRS="$HOME/workspace/dotfiles"
