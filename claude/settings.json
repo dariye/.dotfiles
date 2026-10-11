@@ -33,6 +33,7 @@
       }
     ]
   },
+  "includeCoAuthoredBy": false,
   "model": "fable",
   "modelSettings": {
     "claude-fable-5-1": {
