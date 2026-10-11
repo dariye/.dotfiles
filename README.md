@@ -85,6 +85,16 @@ nothing employer-specific, secret-like or machine-specific lands in it:
   (`mac-setup` sets `core.hooksPath`); CI runs it on the whole tree plus
   gitleaks over the full history. Genuinely public lines go in `.leak-allow`.
 - The Claude settings seed above: the live file is never linked back here.
+- Other repos reuse the scanner with their own `.leak-patterns` (one regex per
+  line); the personal workspace repo does this for employer terms and bank
+  account shapes.
+
+## Doctor
+
+`scripts/doctor` is a read-only health check for the whole setup: the three
+roots, every rcm link, skill symlinks, moi registry paths and server, beads
+`file://` remotes, the Syncthing folder path, and the leak-guard hooks. Run it
+after moving anything; the personal admin skill runs it monthly.
 
 ## My programs
 All of these are installed by `mac-setup`, via the Brewfile unless noted.

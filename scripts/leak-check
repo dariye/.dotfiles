@@ -1,7 +1,9 @@
 #!/bin/bash
 # Fail if anything employer-specific, secret-like or machine-specific is about
 # to land in this PUBLIC repo. Used by .githooks/pre-commit (staged files) and
-# by CI (whole tree). Allowlist exact lines in .leak-allow.
+# by CI (whole tree). Allowlist exact lines in .leak-allow. A repo can replace
+# the default pattern list with its own: one extended regex per line in
+# .leak-patterns at its root (lines starting with # are comments).
 #
 #   scripts/leak-check            # whole tree
 #   scripts/leak-check --staged   # files staged for commit
@@ -23,7 +25,11 @@ PATTERNS=(
   '/Users/[a-z]' '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}'
   '[0-9]{8,}'                  # account numbers, ids
 )
-RE="$(IFS='|'; echo "${PATTERNS[*]}")"
+if [ -f .leak-patterns ]; then
+  RE="$(grep -vE '^\s*(#|$)' .leak-patterns | paste -sd'|' -)"
+else
+  RE="$(IFS='|'; echo "${PATTERNS[*]}")"
+fi
 
 MODE=tree
 if [ "${1:-}" = "--staged" ]; then
@@ -38,12 +44,12 @@ ALLOW=.leak-allow
 hits=0
 while IFS= read -r f; do
   [ -n "$f" ] && [ -f "$f" ] || continue
-  case "$f" in *.png|*.jpg|*.lock.json|$ALLOW|scripts/leak-check) continue;; esac
+  case "$f" in *.png|*.jpg|*.pdf|*.lock.json|$ALLOW|.leak-patterns|scripts/leak-check) continue;; esac
   if [ "$MODE" = staged ]; then src() { git show ":$f"; }; else src() { cat "$f"; }; fi
   while IFS= read -r line; do
     if [ -f "$ALLOW" ] && grep -qxF -- "${line#*:}" "$ALLOW"; then continue; fi
     printf '%s:%s\n' "$f" "$line"; hits=$((hits+1))
-  done < <(src | grep -niE -- "$RE" || true)
+  done < <(src | grep -nIiE -- "$RE" || true)
 done <<< "$FILES"
 
 if [ "$hits" -gt 0 ]; then
