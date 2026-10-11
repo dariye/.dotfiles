@@ -132,6 +132,21 @@ fancy_echo "   Pair devices at http://127.0.0.1:8384 and share the workspace-moi
 # to a file rather than piped straight from curl. House rules: no messaging
 # gateways on a work machine; ~/.hermes is Hermes' own scratch — beads
 # stays the canonical memory (see 'The agent's brain' in the README).
+# Global agent skills — installed via the skills CLI (skills.sh) rather
+# than vendored into this repo, same philosophy as brew/bun: dotfiles
+# declare, installers fetch. Add new skills to the list below.
+# Work-specific skills (e.g. eva-token) stay machine-local, never here.
+fancy_echo "🧩 Installing agent skills..."
+AGENT_SKILLS="humanlayer/skills:show-me"
+for entry in $AGENT_SKILLS; do
+  repo="${entry%%:*}" skill="${entry##*:}"
+  if [ ! -d "$HOME/.claude/skills/$skill" ]; then
+    mise exec node -- npx -y skills add "$repo" -g -y --agent claude-code --skill "$skill"
+  else
+    fancy_echo "   $skill already installed"
+  fi
+done
+
 fancy_echo "🪽 Installing Hermes Agent..."
 if ! command -v hermes >/dev/null 2>&1; then
   HERMES_INSTALLER="$(mktemp -d)/hermes-install.sh"

@@ -1,4 +1,4 @@
 {
-  "theme": "dark-ansi",
-  "model": "claude-fable-5[1m]"
+  "model": "opus[1m]",
+  "theme": "dark-ansi"
 }
